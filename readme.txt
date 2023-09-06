@@ -1,0 +1,1 @@
+https://nextion.tech/instruction-set/#s7
