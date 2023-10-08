@@ -16,3 +16,4 @@ bool helper_index_in_range(int index);
 bool helper_num_points_in_range(uint8_t num_points_u8);
 bool helper_row_to_fill_in_Range(uint8_t row_to_fill_u8);
 double helper_get_fc(sensor_unit_t old_unit, sensor_unit_t new_unit, sensor_type_t type);
+

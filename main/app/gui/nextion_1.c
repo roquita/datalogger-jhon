@@ -176,155 +176,370 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
         uint8_t component_id = cmd->touch_event.component_id;
         uint8_t event = cmd->touch_event.event;
 
-        // HOME
-        if (page == 0 && component_id == 0x00)
-            SEND2FRONT_EMPTY_MSG(main_queue, HOME_LOADED, portMAX_DELAY)
-        // HOME - TARA 1 BUTTON
-        else if (page == 0 && component_id == 0x04 && event == 0x03)
-            SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_1_INDEX, portMAX_DELAY)
-        else if (page == 0 && component_id == 0x04 && event == 0x04)
-            SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_1_INDEX, portMAX_DELAY)
-        // HOME - TARA 2 BUTTON
-        else if (page == 0 && component_id == 0x0B && event == 0x03)
-            SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_2_INDEX, portMAX_DELAY)
-        else if (page == 0 && component_id == 0x0B && event == 0x04)
-            SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_2_INDEX, portMAX_DELAY)
-        // HOME - TARA 3 BUTTON
-        else if (page == 0 && component_id == 0x12 && event == 0x03)
-            SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_3_INDEX, portMAX_DELAY)
-        else if (page == 0 && component_id == 0x12 && event == 0x04)
-            SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_3_INDEX, portMAX_DELAY)
-        // HOME - TARA 4 BUTTON
-        else if (page == 0 && component_id == 0x19 && event == 0x03)
-            SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
-        else if (page == 0 && component_id == 0x19 && event == 0x04)
-            SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
-        // SYSTEM SETTINGS LOADED
-        else if (page == 1 && component_id == 0x00)
-            SEND2FRONT_EMPTY_MSG(main_queue, SYSTEM_SETTINGS_LOADED, portMAX_DELAY)
-        // CALIBRATION LOADED
-        else if (page == 2 && component_id == 0x00)
-            SEND2FRONT_EMPTY_MSG(main_queue, CALIBRATION_LOADED, portMAX_DELAY)
-        // CALIBRATION - SWITCH 1
-        else if (page == 2 && component_id == 0x04 && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_1_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x04 && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_1_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 2
-        else if (page == 2 && component_id == 0x10 && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_2_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x10 && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_2_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 3
-        else if (page == 2 && component_id == 0x16 && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_3_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x16 && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_3_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 4
-        else if (page == 2 && component_id == 0x1C && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x1C && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 5
-        else if (page == 2 && component_id == 0x22 && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_5_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x22 && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_5_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 6
-        else if (page == 2 && component_id == 0x28 && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_6_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x28 && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_6_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 7
-        else if (page == 2 && component_id == 0x2E && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_7_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x2E && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_7_INDEX, portMAX_DELAY)
-        // CALIBRATION - SWITCH 8
-        else if (page == 2 && component_id == 0x34 && event == 0x02)
-            SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_8_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x34 && event == 0x03)
-            SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_8_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 1
-        else if (page == 2 && component_id == 0x01 && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_1_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x01 && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_1_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 2
-        else if (page == 2 && component_id == 0x0D && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_2_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x0D && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_2_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 3
-        else if (page == 2 && component_id == 0x13 && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_3_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x13 && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_3_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 4
-        else if (page == 2 && component_id == 0x19 && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x19 && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 5
-        else if (page == 2 && component_id == 0x1F && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_5_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x1F && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_5_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 6
-        else if (page == 2 && component_id == 0x25 && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_6_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x25 && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_6_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 7
-        else if (page == 2 && component_id == 0x2B && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_7_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x2B && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_7_INDEX, portMAX_DELAY)
-        // CALIBRATION - LIMITS 8
-        else if (page == 2 && component_id == 0x31 && event == 0x02)
-            SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_8_INDEX, portMAX_DELAY)
-        else if (page == 2 && component_id == 0x31 && event == 0x03)
-            SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_8_INDEX, portMAX_DELAY)
-
-        // INPUTCALIBP1 LOADED
-        else if (page == 8 && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, INPUTCALIBP1_LOADED, portMAX_DELAY)
-        // INPUTCALIBP2 LOADED
-        else if (page == 9 && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, INPUTCALIBP2_LOADED, portMAX_DELAY)
-        // INPUTCALIBP3 LOADED
-        else if (page == 10 && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, INPUTCALIBP3_LOADED, portMAX_DELAY)
-        // INPUTCALIBP4 LOADED
-        else if (page == 11 && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, INPUTCALIBP4_LOADED, portMAX_DELAY)
-        // INPUTCALIBP4 SAVE
-        else if (page == 0x0B && component_id == 0x0A)
-            SEND_EMPTY_MSG(main_queue, INPUTCALIBP4_SAVE_PRESSED, portMAX_DELAY)
-
-        // INPUT CONFIGURATION P1 LOADED
-        else if (page == 0x0F && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, INPUTCONFIGP1_LOADED, portMAX_DELAY)
-        // INPUTCONFIGP1 SAVE
-        else if (page == 0x0F && component_id == 0x0D)
-            SEND_EMPTY_MSG(main_queue, INPUTCONFIGP1_SAVE_PRESSED, portMAX_DELAY)
-
-        // NUMPAP POPUP LOADED
-        else if (page == 0x03 && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, NUMPAD_POPUP_LOADED, portMAX_DELAY)
-
-        // NEW TEST LOADED
-        else if (page == 0x0D && component_id == 0x00)
-            SEND_EMPTY_MSG(main_queue, NEW_TEST_LOADED, portMAX_DELAY)
-        // NEW TEST START
-        else if (page == 0x0D && component_id == 0x28)
-            SEND_EMPTY_MSG(main_queue, NEW_TEST_START, portMAX_DELAY)
-        // NEW TEST STOP
-        else if (page == 0x0D && component_id == 0x29)
-            SEND_EMPTY_MSG(main_queue, NEW_TEST_STOP, portMAX_DELAY)
-        // NEW TEST DOWNLOAD
-        else if (page == 0x0D && component_id == 0x2A)
-            SEND_EMPTY_MSG(main_queue, NEW_TEST_DOWNLOAD, portMAX_DELAY)
+        if (page == PAGE_HOME)
+        {
+            // HOME LOADED
+            if (component_id == 0x00)
+                SEND2FRONT_EMPTY_MSG(main_queue, HOME_LOADED, portMAX_DELAY)
+            // HOME - TARA 1 BUTTON
+            else if (component_id == 0x04 && event == 0x03)
+                SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_1_INDEX, portMAX_DELAY)
+            else if (component_id == 0x04 && event == 0x04)
+                SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_1_INDEX, portMAX_DELAY)
+            // HOME - TARA 2 BUTTON
+            else if (component_id == 0x0B && event == 0x03)
+                SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_2_INDEX, portMAX_DELAY)
+            else if (component_id == 0x0B && event == 0x04)
+                SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_2_INDEX, portMAX_DELAY)
+            // HOME - TARA 3 BUTTON
+            else if (component_id == 0x12 && event == 0x03)
+                SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_3_INDEX, portMAX_DELAY)
+            else if (component_id == 0x12 && event == 0x04)
+                SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_3_INDEX, portMAX_DELAY)
+            // HOME - TARA 4 BUTTON
+            else if (component_id == 0x19 && event == 0x03)
+                SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            else if (component_id == 0x19 && event == 0x04)
+                SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
+        }
+        else if (page == PAGE_SYSTEM_SETTINGS)
+        {
+            // SYSTEM SETTINGS LOADED
+            if (component_id == 0x00)
+                SEND2FRONT_EMPTY_MSG(main_queue, SYSTEM_SETTINGS_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_CALIBRATION)
+        {
+            // CALIBRATION LOADED
+            if (component_id == 0x00)
+                SEND2FRONT_EMPTY_MSG(main_queue, CALIBRATION_LOADED, portMAX_DELAY)
+            // CALIBRATION - SWITCH 1
+            else if (component_id == 0x04 && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_1_INDEX, portMAX_DELAY)
+            else if (component_id == 0x04 && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_1_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 2
+            else if (component_id == 0x10 && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_2_INDEX, portMAX_DELAY)
+            else if (component_id == 0x10 && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_2_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 3
+            else if (component_id == 0x16 && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_3_INDEX, portMAX_DELAY)
+            else if (component_id == 0x16 && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_3_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 4
+            else if (component_id == 0x1C && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            else if (component_id == 0x1C && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 5
+            else if (component_id == 0x22 && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_5_INDEX, portMAX_DELAY)
+            else if (component_id == 0x22 && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_5_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 6
+            else if (component_id == 0x28 && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_6_INDEX, portMAX_DELAY)
+            else if (component_id == 0x28 && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_6_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 7
+            else if (component_id == 0x2E && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_7_INDEX, portMAX_DELAY)
+            else if (component_id == 0x2E && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_7_INDEX, portMAX_DELAY)
+            // CALIBRATION - SWITCH 8
+            else if (component_id == 0x34 && event == 0x02)
+                SEND_I32_MSG(main_queue, SENSOR_DISABLED, SENSOR_8_INDEX, portMAX_DELAY)
+            else if (component_id == 0x34 && event == 0x03)
+                SEND_I32_MSG(main_queue, SENSOR_ENABLED, SENSOR_8_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 1
+            else if (component_id == 0x01 && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_1_INDEX, portMAX_DELAY)
+            else if (component_id == 0x01 && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_1_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 2
+            else if (component_id == 0x0D && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_2_INDEX, portMAX_DELAY)
+            else if (component_id == 0x0D && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_2_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 3
+            else if (component_id == 0x13 && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_3_INDEX, portMAX_DELAY)
+            else if (component_id == 0x13 && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_3_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 4
+            else if (component_id == 0x19 && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            else if (component_id == 0x19 && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 5
+            else if (component_id == 0x1F && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_5_INDEX, portMAX_DELAY)
+            else if (component_id == 0x1F && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_5_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 6
+            else if (component_id == 0x25 && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_6_INDEX, portMAX_DELAY)
+            else if (component_id == 0x25 && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_6_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 7
+            else if (component_id == 0x2B && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_7_INDEX, portMAX_DELAY)
+            else if (component_id == 0x2B && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_7_INDEX, portMAX_DELAY)
+            // CALIBRATION - LIMITS 8
+            else if (component_id == 0x31 && event == 0x02)
+                SEND_I32_MSG(main_queue, LIMITS_DISABLED, SENSOR_8_INDEX, portMAX_DELAY)
+            else if (component_id == 0x31 && event == 0x03)
+                SEND_I32_MSG(main_queue, LIMITS_ENABLED, SENSOR_8_INDEX, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP1)
+        {
+            // INPUTCALIBP1 LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, INPUTCALIBP1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP2)
+        {
+            // INPUTCALIBP2 LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, INPUTCALIBP2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP3)
+        {
+            // INPUTCALIBP3 LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, INPUTCALIBP3_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP4)
+        {
+            // INPUTCALIBP4 LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, INPUTCALIBP4_LOADED, portMAX_DELAY)
+            // INPUTCALIBP4 SAVE
+            else if (component_id == 0x0A)
+                SEND_EMPTY_MSG(main_queue, INPUTCALIBP4_SAVE_PRESSED, portMAX_DELAY)
+        }
+        else if (page == PAGE_KEYBDA)
+        {
+            // INPUTCALIBP4 LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, KEYBDA_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NUMPAD_POPUP)
+        {
+            // NUMPAP POPUP LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NUMPAD_POPUP_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_INTRO)
+        {
+            // NUMPAP POPUP LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, INTRO_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCONFIGP1)
+        {
+            // INPUT CONFIGURATION P1 LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, INPUTCONFIGP1_LOADED, portMAX_DELAY)
+            // INPUTCONFIGP1 SAVE
+            else if (component_id == 0x0D)
+                SEND_EMPTY_MSG(main_queue, INPUTCONFIGP1_SAVE_PRESSED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P1)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P2)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_1)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P3_1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_2)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P3_2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_3)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P3_3_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_4)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P3_4_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_LOG_SENSOR_TABLE)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, LOG_SENSOR_TABLE_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_LOG_TIME_TABLE)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, LOG_TIME_TABLE_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_1)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_2)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_3)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_3_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_4)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_4_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_5)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_5_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_6)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_6_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_7)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_7_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_8)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_8_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_9)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P4_9_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P5)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P5_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P6)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P6_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_1)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P7_1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_2)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P7_2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_3)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P7_3_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_4)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, NEW_TEST_P7_4_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_PREVIOUS_TEST_P1)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, PREVIOUS_TEST_P1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_PREVIOUS_TEST_P2)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, PREVIOUS_TEST_P2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_PREVIOUS_TEST_P3)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, PREVIOUS_TEST_P3_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_EXPORT_TEST)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, EXPORT_TEST_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_DELETE_TEST)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, DELETE_TEST_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_MESSAGE)
+        {
+            //  LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, MESSAGE_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_CURRENT_TEST_P1)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, CURRENT_TEST_P1_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_CURRENT_TEST_P2)
+        {
+            //   LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, CURRENT_TEST_P2_LOADED, portMAX_DELAY)
+        }
+        else if (page == PAGE_CURRENT_TEST_P3)
+        {
+            // LOADED
+            if (component_id == 0x00)
+                SEND_EMPTY_MSG(main_queue, CURRENT_TEST_P3_LOADED, portMAX_DELAY)
+        }
 
         // UNKNOWN TOUCH EVENT
         else
@@ -340,78 +555,191 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
         void *data = cmd->custom_event.data;
         int data_len = cmd->custom_event.data_len;
 
-        // CALIBRATION SENSOR 1 UNIT CHANGED
-        if (page == 2 && component_id == 0x4D)
-            SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_1_INDEX, portMAX_DELAY)
-        // CALIBRATION SENSOR 2 UNIT CHANGED
-        else if (page == 2 && component_id == 0x4C)
-            SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_2_INDEX, portMAX_DELAY)
-        // CALIBRATION SENSOR 3  UNIT CHANGED
-        else if (page == 2 && component_id == 0x4B)
-            SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_3_INDEX, portMAX_DELAY)
-        // CALIBRATION SENSOR 4  UNIT CHANGED
-        else if (page == 2 && component_id == 0x4A)
-            SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_4_INDEX, portMAX_DELAY)
-        // INPUTCALIBP1  TYPE RECEIVED
-        else if (page == 8 && component_id == 0x10)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP1_TYPE_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP1  CAPACITY RECEIVED
-        else if (page == 8 && component_id == 0x09)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP1_CAPACITY_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP1  CAPACITY UNIT RECEIVED
-        else if (page == 8 && component_id == 0x0F)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP1_CAPACITY_UNIT_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP1  SENSIBILITY RECEIVED
-        else if (page == 8 && component_id == 0x0A)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP1_SENSIBILITY_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP1  SENSIBILITY UNIT RECEIVED
-        else if (page == 8 && component_id == 0x0B)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP1_SENSIBILITY_UNIT_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP1 SENSOR INDEX RECEIVED
-        else if (page == 8 && component_id == 0x13)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP1_SENSOR_INDEX_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP2 CALIBRATION LIMIT RECEIVED
-        else if (page == 9 && component_id == 0x08)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP2_CALIBRATION_LIMIT_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP2  LIMIT ENABLE RECEIVED
-        else if (page == 9 && component_id == 0x0D)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP2_LIMIT_ENABLE_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP3 TABLE RECEIVED
-        else if (page == 0x0A && component_id == 0x1C)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP3_TABLE_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP3 NUM POINTS RECEIVED
-        else if (page == 0x0A && component_id == 0x32)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP3_NUM_POINTS_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP3 ROW TO FILL RECEIVED
-        else if (page == 0x0A && component_id == 0x0C)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP3_ROW_TO_FILL_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCALIBP4 NAME RECEIVED
-        else if (page == 0x0B && component_id == 0x08)
-            SEND_ADDR_MSG(main_queue, INPUTCALIBP4_NAME_RECEIVED, data, data_len, portMAX_DELAY)
-
-        // INPUTCONFIGP1 TYPE RECEIVED
-        else if (page == 0x0F && component_id == 0x0F)
-            SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_TYPE_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCONFIGP1 CAPACITY RECEIVED
-        else if (page == 0x0F && component_id == 0x04)
-            SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_CAPACITY_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCONFIGP1 CAPACITY UNIT RECEIVED
-        else if (page == 0x0F && component_id == 0x0E)
-            SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_CAPACITY_UNIT_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCONFIGP1 NAME RECEIVED
-        else if (page == 0x0F && component_id == 0x09)
-            SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_NAME_RECEIVED, data, data_len, portMAX_DELAY)
-        // INPUTCONFIGP1  INDEX RECEIVED
-        else if (page == 0x0F && component_id == 0x11)
-            SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_INDEX_RECEIVED, data, data_len, portMAX_DELAY)
-
-        // NEW TEST SET INDEX 1
-        else if (page == 0x0D && component_id == 0x2E)
-            SEND_ADDR_MSG(main_queue, NEW_TEST_SET_INDEX1, data, data_len, portMAX_DELAY)
-        // NEW TEST SET INDEX 2
-        else if (page == 0x0D && component_id == 0x2D)
-            SEND_ADDR_MSG(main_queue, NEW_TEST_SET_INDEX2, data, data_len, portMAX_DELAY)
-
+        if (page == PAGE_CALIBRATION)
+        {
+            // CALIBRATION SENSOR 1 UNIT CHANGED
+            if (component_id == 0x4D)
+                SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_1_INDEX, portMAX_DELAY)
+            // CALIBRATION SENSOR 2 UNIT CHANGED
+            else if (component_id == 0x4C)
+                SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_2_INDEX, portMAX_DELAY)
+            // CALIBRATION SENSOR 3  UNIT CHANGED
+            else if (component_id == 0x4B)
+                SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_3_INDEX, portMAX_DELAY)
+            // CALIBRATION SENSOR 4  UNIT CHANGED
+            else if (component_id == 0x4A)
+                SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_4_INDEX, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP1)
+        {
+            // INPUTCALIBP1  TYPE RECEIVED
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP1_TYPE_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP1  CAPACITY RECEIVED
+            else if (component_id == 0x09)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP1_CAPACITY_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP1  CAPACITY UNIT RECEIVED
+            else if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP1_CAPACITY_UNIT_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP1  SENSIBILITY RECEIVED
+            else if (component_id == 0x0A)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP1_SENSIBILITY_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP1  SENSIBILITY UNIT RECEIVED
+            else if (component_id == 0x0B)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP1_SENSIBILITY_UNIT_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP1 SENSOR INDEX RECEIVED
+            else if (component_id == 0x13)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP1_SENSOR_INDEX_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP2)
+        {
+            // INPUTCALIBP2 CALIBRATION LIMIT RECEIVED
+            if (component_id == 0x08)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP2_CALIBRATION_LIMIT_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP2  LIMIT ENABLE RECEIVED
+            else if (component_id == 0x0D)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP2_LIMIT_ENABLE_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP3)
+        {
+            // INPUTCALIBP3 TABLE RECEIVED
+            if (component_id == 0x1C)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP3_TABLE_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP3 NUM POINTS RECEIVED
+            else if (component_id == 0x32)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP3_NUM_POINTS_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCALIBP3 ROW TO FILL RECEIVED
+            else if (component_id == 0x0C)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP3_ROW_TO_FILL_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCALIBP4)
+        {
+            // INPUTCALIBP4 NAME RECEIVED
+            if (component_id == 0x08)
+                SEND_ADDR_MSG(main_queue, INPUTCALIBP4_NAME_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_INPUTCONFIGP1)
+        {
+            // INPUTCONFIGP1 TYPE RECEIVED
+            if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_TYPE_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCONFIGP1 CAPACITY RECEIVED
+            else if (component_id == 0x04)
+                SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_CAPACITY_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCONFIGP1 CAPACITY UNIT RECEIVED
+            else if (component_id == 0x0E)
+                SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_CAPACITY_UNIT_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCONFIGP1 NAME RECEIVED
+            else if (component_id == 0x09)
+                SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_NAME_RECEIVED, data, data_len, portMAX_DELAY)
+            // INPUTCONFIGP1  INDEX RECEIVED
+            else if (component_id == 0x11)
+                SEND_ADDR_MSG(main_queue, INPUTCONFIGP1_INDEX_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P1)
+        {
+            if (component_id == 0x0C)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P1_TYPE_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P2)
+        {
+            if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P2_INPUTS_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_1)
+        {
+            if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P3_1_LOGGING_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_2)
+        {
+            if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P3_2_LOGGING_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_3)
+        {
+            if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P3_3_LOGGING_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P3_4)
+        {
+            if (component_id == 0x0F)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P3_4_LOGGING_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_1)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_1_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_2)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_2_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_3)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_3_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_4)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_4_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_5)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_5_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_6)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_6_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_7)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_7_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_8)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_8_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P4_9)
+        {
+            if (component_id == 0x10)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P4_9_STOP_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P6)
+        {
+            if (component_id == 0x12)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P6_GRAPH_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_1)
+        {
+            if (component_id == 0x0C)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P7_1_START_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_2)
+        {
+            if (component_id == 0x0C)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P7_2_START_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_3)
+        {
+            if (component_id == 0x0C)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P7_3_START_RECEIVED, data, data_len, portMAX_DELAY)
+            else if (component_id == 0x22)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P7_3_TRIGGER_INPUT_RECEIVED, data, data_len, portMAX_DELAY)
+        }
+        else if (page == PAGE_NEW_TEST_P7_4)
+        {
+            if (component_id == 0x0C)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P7_4_START_RECEIVED, data, data_len, portMAX_DELAY)
+            else if (component_id == 0x22)
+                SEND_ADDR_MSG(main_queue, NEW_TEST_P7_4_TRIGGER_INPUT_RECEIVED, data, data_len, portMAX_DELAY)
+        }
         // UNKNOWN CUSTOM EVENT
         else
         {
@@ -468,6 +796,21 @@ void nextion_1_set_page(page_t new_page)
 page_t nextion_1_get_page()
 {
     return page;
+}
+
+/*
+ ██████╗ ███████╗███╗   ██╗███████╗██████╗  █████╗ ██╗
+██╔════╝ ██╔════╝████╗  ██║██╔════╝██╔══██╗██╔══██╗██║
+██║  ███╗█████╗  ██╔██╗ ██║█████╗  ██████╔╝███████║██║
+██║   ██║██╔══╝  ██║╚██╗██║██╔══╝  ██╔══██╗██╔══██║██║
+╚██████╔╝███████╗██║ ╚████║███████╗██║  ██║██║  ██║███████╗
+ ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+
+*/
+
+void nextion_1_change_page(page_t page)
+{
+    nextion_goto_page_from_pageIndex(&nextion_1, page);
 }
 
 /*
@@ -710,52 +1053,53 @@ void nextion_1_inputconfigp1_write_result_color(uint32_t content)
 }
 
 /*
-███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗
-████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
-██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║
-██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║
-██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║
-╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ███████╗      ██████╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██║      ╚════██╗
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝    ██╔╝       █████╔╝
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝    ██╔╝        ╚═══██╗
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║        ██║███████╗██████╔╝
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝        ╚═╝╚══════╝╚═════╝
 
 */
 
-void nextion_1_newtest_write_table01(char *content)
+void nextion_1_new_test_p7_3_write_current_value(char *content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 30, content);
+    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST_P7_3, 28, content);
 }
-void nextion_1_newtest_write_table11(char *content)
+
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ███████╗ ██╗  ██╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██║ ██║  ██║
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝    ██╔╝ ███████║
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝    ██╔╝  ╚════██║
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║        ██║███████╗██║
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝        ╚═╝╚══════╝╚═╝
+
+*/
+
+void nextion_1_new_test_p7_4_write_current_value(char *content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 31, content);
+    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST_P7_4, 28, content);
 }
-void nextion_1_newtest_write_table21(char *content)
+
+/*
+███╗   ███╗███████╗███████╗███████╗ █████╗  ██████╗ ███████╗
+████╗ ████║██╔════╝██╔════╝██╔════╝██╔══██╗██╔════╝ ██╔════╝
+██╔████╔██║█████╗  ███████╗███████╗███████║██║  ███╗█████╗
+██║╚██╔╝██║██╔══╝  ╚════██║╚════██║██╔══██║██║   ██║██╔══╝
+██║ ╚═╝ ██║███████╗███████║███████║██║  ██║╚██████╔╝███████╗
+╚═╝     ╚═╝╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+
+*/
+void nextion_1_message_write_content(char *content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 32, content);
+    nextion_set_txt_from_objId(&nextion_1, PAGE_MESSAGE, 2, content);
 }
-void nextion_1_newtest_write_table31(char *content)
+void nextion_1_message_write_nextpage(page_t content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 33, content);
+    nextion_set_val_from_objId(&nextion_1, PAGE_MESSAGE, 6, content);
 }
-void nextion_1_newtest_write_table41(char *content)
+void nextion_1_message_write_content_color(uint32_t content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 34, content);
-}
-void nextion_1_newtest_write_table51(char *content)
-{
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 35, content);
-}
-void nextion_1_newtest_write_table61(char *content)
-{
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 36, content);
-}
-void nextion_1_newtest_write_table71(char *content)
-{
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 37, content);
-}
-void nextion_1_newtest_write_table81(char *content)
-{
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 38, content);
-}
-void nextion_1_newtest_write_table91(char *content)
-{
-    nextion_set_txt_from_objId(&nextion_1, PAGE_NEW_TEST, 39, content);
+    nextion_set_pco_from_objId(&nextion_1, PAGE_MESSAGE, 2, content);
 }

@@ -6,6 +6,7 @@
 #include "stdint.h"
 #include "esp_log.h"
 #include "esp_err.h"
+#include "new_test.h"
 
 #define TAG "HELPERS"
 
@@ -122,3 +123,5 @@ double helper_get_fc(sensor_unit_t old_unit, sensor_unit_t new_unit, sensor_type
 char *sensor_unit_str[] = {"cm", "in", "mm", "kN", "lbf", "N",
                            "kgf", "kPa", "psi", "ksf", "MPa",
                            "kgf/cm2", "cm3", "in3"};
+
+

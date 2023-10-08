@@ -13,7 +13,7 @@ void sensor_init(int index)
     sensor[index].config = SENSOR_CONFIG_DEFAULT;
     sensor[index].data = SENSOR_DATA_DEFAULT;
     // sensor[index].class = CLASS_MAX;
-    sensor[index].use = USE_MAX;
+    sensor[index].is_free = true;
     sensor[index].is_calibrated = false;
 }
 void sensor_set_class(int index, sensor_class_t class)
@@ -138,6 +138,10 @@ bool sensor_is_ready(int index)
         bool is_enabled = sensor_is_enabled(index);
         return is_enabled;
     }
+}
+bool sensor_is_free(int index)
+{
+    return sensor[index].is_free;
 }
 void sensor_set_calibration(int index, sensor_calib_t *calib)
 {

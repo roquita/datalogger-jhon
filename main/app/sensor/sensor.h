@@ -73,7 +73,6 @@ typedef struct
 typedef enum
 {
     USE_FREE,
-    USE_CALIBRATING,
     USE_TESTING,
     USE_MAX,
 } sensor_use_t;
@@ -83,7 +82,7 @@ typedef struct
     sensor_config_t config;
     sensor_data_t data;
     sensor_class_t class;
-    sensor_use_t use;
+    bool is_free;
     bool is_calibrated;
 } sensor_dev_t;
 
@@ -105,6 +104,7 @@ double sensor_get_realps(int index);
 char *sensor_get_realps_str(int index);
 bool sensor_is_calibrated(int index);
 bool sensor_is_ready(int index);
+bool sensor_is_free(int index);
 void sensor_set_calibration(int index, sensor_calib_t *calib);
 void sensor_set_configuration(int index, sensor_config_t *config);
 sensor_config_t *sensor_get_configuration(int index);

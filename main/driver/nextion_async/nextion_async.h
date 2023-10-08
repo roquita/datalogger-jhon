@@ -90,3 +90,5 @@ nextion_res_t nextion_set_path_from_objId(nextion_t *dev, int pageIndex, int obj
 nextion_res_t nextion_set_pco_from_objId(nextion_t *dev, int pageIndex, int objId, uint32_t content);
 nextion_res_t nextion_set_val_from_objId(nextion_t *dev, int pageIndex, int objId, int32_t content);
 nextion_res_t nextion_set_txt_from_objId(nextion_t *dev, int pageIndex, int objId, char *content);
+
+nextion_res_t nextion_goto_page_from_pageIndex(nextion_t *dev, uint8_t pageIndex);

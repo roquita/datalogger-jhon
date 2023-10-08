@@ -65,3 +65,7 @@
             return;       \
         }                 \
     }
+
+
+#define NEXTION_COLOR_RED (45317) 
+#define NEXTION_COLOR_GREEN (2016)

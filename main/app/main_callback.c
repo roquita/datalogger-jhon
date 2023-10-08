@@ -2,6 +2,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "esp_log.h"
+#include "string.h"
 #include "project_defines.h"
 #include "project_typedefs.h"
 #include "project_tasks.h"
@@ -10,8 +11,8 @@
 #include "calibration.h"
 #include "configuration.h"
 #include "esp_err.h"
-#include "testing.h"
 #include "helpers.h"
+#include "new_test.h"
 
 #define TAG "MAIN_CALLBACK"
 
@@ -134,31 +135,176 @@ void inputcalibp4_loaded_cb(msg_t *msg)
     nextion_1_set_page(PAGE_INPUTCALIBP4);
     nextion_1_stop_timer();
 }
+void keybda_loaded_cb(msg_t *msg) {}
 void numpad_popup_loaded_cb(msg_t *msg)
 {
     nextion_1_set_page(PAGE_NUMPAD_POPUP);
     nextion_1_stop_timer();
 }
-void new_test_loaded_cb(msg_t *msg)
-{
-    ESP_LOGI(TAG, "%s", __func__);
-    nextion_1_set_page(PAGE_NEW_TEST);
-    nextion_1_stop_timer();
-}
+void intro_loaded_cb(msg_t *msg) {}
 void inputconfigp1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(INPUTCONFIGP1_LOADED);
     nextion_1_stop_timer();
 }
+void new_test_p1_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P1);
+    nextion_1_stop_timer();
+
+    new_test_init();
+}
+void new_test_p2_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P2);
+    nextion_1_stop_timer();
+}
+void new_test_p3_1_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P3_1);
+    nextion_1_stop_timer();
+}
+void new_test_p3_2_loadedcb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P3_2);
+    nextion_1_stop_timer();
+}
+void new_test_p3_3_loadedcb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P3_3);
+    nextion_1_stop_timer();
+}
+void new_test_p3_4_loadedcb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P3_4);
+    nextion_1_stop_timer();
+}
+void log_sensor_table_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_LOG_SENSOR_TABLE);
+    nextion_1_stop_timer();
+}
+void log_time_table_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_LOG_TIME_TABLE);
+    nextion_1_stop_timer();
+}
+void new_test_p4_1_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_1);
+    nextion_1_stop_timer();
+}
+void new_test_p4_2_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_2);
+    nextion_1_stop_timer();
+}
+void new_test_p4_3_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_3);
+    nextion_1_stop_timer();
+}
+void new_test_p4_4_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_4);
+    nextion_1_stop_timer();
+}
+void new_test_p4_5_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_5);
+    nextion_1_stop_timer();
+}
+void new_test_p4_6_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_6);
+    nextion_1_stop_timer();
+}
+void new_test_p4_7_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_7);
+    nextion_1_stop_timer();
+}
+void new_test_p4_8_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_8);
+    nextion_1_stop_timer();
+}
+void new_test_p4_9_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P4_9);
+    nextion_1_stop_timer();
+}
+void new_test_p5_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P5);
+    nextion_1_stop_timer();
+}
+void new_test_p6_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P6);
+    nextion_1_stop_timer();
+}
+void new_test_p7_1_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P7_1);
+    nextion_1_stop_timer();
+}
+void new_test_p7_2_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P7_2);
+    nextion_1_stop_timer();
+}
+void new_test_p7_3_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P7_3);
+    nextion_1_start_timer();
+}
+void new_test_p7_4_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+    nextion_1_set_page(PAGE_NEW_TEST_P7_4);
+    nextion_1_start_timer();
+}
+void previous_test_p1_loaded_cb(msg_t *msg) {}
+void previous_test_p2_loaded_cb(msg_t *msg) {}
+void previous_test_p3_loaded_cb(msg_t *msg) {}
+void export_test_loaded_cb(msg_t *msg) {}
+void delete_test_loaded_cb(msg_t *msg) {}
+void message_loaded_cb(msg_t *msg) {}
+void current_test_p1_loaded_cb(msg_t *msg) {}
+void current_test_p2_loaded_cb(msg_t *msg) {}
+void current_test_p3_loaded_cb(msg_t *msg) {}
 
 /*
-████████╗ █████╗ ██████╗  █████╗
-╚══██╔══╝██╔══██╗██╔══██╗██╔══██╗
-   ██║   ███████║██████╔╝███████║
-   ██║   ██╔══██║██╔══██╗██╔══██║
-   ██║   ██║  ██║██║  ██║██║  ██║
-   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+██╗  ██╗ ██████╗ ███╗   ███╗███████╗
+██║  ██║██╔═══██╗████╗ ████║██╔════╝
+███████║██║   ██║██╔████╔██║█████╗
+██╔══██║██║   ██║██║╚██╔╝██║██╔══╝
+██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗
+╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝
 
 */
 void tara_enabled_cb(msg_t *msg)
@@ -201,12 +347,12 @@ void tara_disabled_cb(msg_t *msg)
 }
 
 /*
-███████╗███████╗███╗   ██╗███████╗ ██████╗ ██████╗     ███████╗███╗   ██╗ █████╗ ██████╗ ██╗     ███████╗
-██╔════╝██╔════╝████╗  ██║██╔════╝██╔═══██╗██╔══██╗    ██╔════╝████╗  ██║██╔══██╗██╔══██╗██║     ██╔════╝
-███████╗█████╗  ██╔██╗ ██║███████╗██║   ██║██████╔╝    █████╗  ██╔██╗ ██║███████║██████╔╝██║     █████╗
-╚════██║██╔══╝  ██║╚██╗██║╚════██║██║   ██║██╔══██╗    ██╔══╝  ██║╚██╗██║██╔══██║██╔══██╗██║     ██╔══╝
-███████║███████╗██║ ╚████║███████║╚██████╔╝██║  ██║    ███████╗██║ ╚████║██║  ██║██████╔╝███████╗███████╗
-╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝    ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
+ ██████╗ █████╗ ██╗     ██╗██████╗ ██████╗  █████╗ ████████╗██╗ ██████╗ ███╗   ██╗
+██╔════╝██╔══██╗██║     ██║██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝██║██╔═══██╗████╗  ██║
+██║     ███████║██║     ██║██████╔╝██████╔╝███████║   ██║   ██║██║   ██║██╔██╗ ██║
+██║     ██╔══██║██║     ██║██╔══██╗██╔══██╗██╔══██║   ██║   ██║██║   ██║██║╚██╗██║
+╚██████╗██║  ██║███████╗██║██████╔╝██║  ██║██║  ██║   ██║   ██║╚██████╔╝██║ ╚████║
+ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
 */
 
@@ -252,6 +398,44 @@ void sensor_enabled_cb(msg_t *msg)
     sensor_enable(index);
 
     // status disabled in nvs
+    config_sensor_save(index, sensor_get_configuration(index));
+}
+void sensor_limits_disabled(msg_t *msg)
+{
+    // get index
+    int index = msg->content.i32;
+
+    // VERIFY INDEX IN RANGE
+    bool in_range = helper_index_in_range(index);
+    if (!in_range)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        return;
+    }
+
+    // set on ram
+    sensor_set_limits(index, false);
+
+    // set on nvs
+    config_sensor_save(index, sensor_get_configuration(index));
+}
+void sensor_limits_enabled(msg_t *msg)
+{
+    // get index
+    int index = msg->content.i32;
+
+    // VERIFY INDEX IN RANGE
+    bool in_range = helper_index_in_range(index);
+    if (!in_range)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        return;
+    }
+
+    // set on ram
+    sensor_set_limits(index, true);
+
+    // set on nvs
     config_sensor_save(index, sensor_get_configuration(index));
 }
 
@@ -645,6 +829,920 @@ void inputconfigp1_save_pressed_cb(msg_t *msg)
 }
 
 /*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗  ██╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗███║
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝╚██║
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝  ██║
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║      ██║
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝      ╚═╝
+
+*/
+
+void new_test_p1_type_received(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 1);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    test_type_t test_type;
+    esp_err_t err = new_test_get_type_from_multiradio(*addr, &test_type);
+
+    // VERIFY UNPACK ERR
+    if (err != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        nextion_1_message_write_content("\r\nERROR: TYPE INVALID");
+        nextion_1_message_write_nextpage(PAGE_NEW_TEST_P1);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_change_page(PAGE_MESSAGE);
+        goto end;
+    }
+
+    // STORE DATA
+    new_test_set_type(&test_type);
+
+    // GOTO NEXT PAGE
+    nextion_1_change_page(PAGE_NEW_TEST_P2);
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██╗
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝ █████╔╝
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝ ██╔═══╝
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║     ███████╗
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚══════╝
+
+*/
+void new_test_p2_inputs_received(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 2);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = (uint8_t *)msg->content.addr;
+    uint8_t input_enable = *addr;
+    uint8_t tara_enable = *(addr + 1);
+
+    // STORE DATA
+    test_inputs_t test_inputs;
+    test_inputs.input_enable.byte = input_enable;
+    test_inputs.tara_enable.byte = tara_enable;
+
+    esp_err_t err3 = new_test_set_inputs(&test_inputs);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██╗
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝ █████╔╝
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝  ╚═══██╗
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║     ██████╔╝
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚═════╝
+
+*/
+void new_test_p3_1_logging_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 12);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    logging_direction_t direction;
+    double value = atof((char *)addr + 2);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*(addr), &sensor_index);
+    esp_err_t err2 = new_test_get_logging_direction_from_combobox(*(addr + 1), &direction);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (err2 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_logging_t test_logging;
+    test_logging.condition = LOGGING_CONDITION_INTERVAL_LOGGING;
+    test_logging.parameters.interval_logging.sensor_index = sensor_index;
+    test_logging.parameters.interval_logging.direction = direction;
+    test_logging.parameters.interval_logging.value = value;
+
+    esp_err_t err3 = new_test_set_logging(&test_logging);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p3_2_logging_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 10);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    int value = atoi((char *)addr);
+
+    // VERIFY UNPACKED
+    if (value <= 0)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_logging_t test_logging;
+    test_logging.condition = LOGGING_CONDITION_LINEAR_TIME_INTERVAL;
+    test_logging.parameters.linear_time_interval.value = (uint32_t)value;
+
+    esp_err_t err3 = new_test_set_logging(&test_logging);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p3_3_logging_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 302);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    logging_direction_t direction;
+    double value[30];
+    for (int i = 0; i < 30; i++)
+    {
+        value[i] = atof((char *)addr + 2 + (i * 10));
+    }
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*(addr), &sensor_index);
+    esp_err_t err2 = new_test_get_logging_direction_from_combobox(*(addr + 1), &direction);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (err2 != ESP_OK))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_logging_t test_logging;
+    test_logging.condition = LOGGING_CONDITION_INTERVAL_LOGGING_TABLE;
+    test_logging.parameters.interval_logging_table.sensor_index = sensor_index;
+    test_logging.parameters.interval_logging_table.direction = direction;
+    memcpy(test_logging.parameters.interval_logging_table.value, value, sizeof(value));
+
+    esp_err_t err3 = new_test_set_logging(&test_logging);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+
+void new_test_p3_4_logging_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 330);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    logging_time_row_t value[30];
+    for (int i = 0; i < 30; i++)
+    {
+        char *base = (char *)addr + (i * 11);
+        value[i].h = (uint8_t)atoi(base);
+        value[i].m = (uint8_t)atoi(base + 3);
+        value[i].s = (float)atof(base + 6);
+    }
+
+    // STORE DATA
+    test_logging_t test_logging;
+    test_logging.condition = LOGGING_CONDITION_ELAPSED_TIME_TABLE;
+    memcpy(test_logging.parameters.elapsed_time_table.value, value, sizeof(value));
+
+    esp_err_t err3 = new_test_set_logging(&test_logging);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ██╗  ██╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗██║  ██║
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝███████║
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝ ╚════██║
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║          ██║
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝          ╚═╝
+
+*/
+void new_test_p4_1_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_GREATER_THAN;
+    test_stop.parameters.greater_than.sensor_index = sensor_index;
+    test_stop.parameters.greater_than.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_2_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_LESS_THAN;
+    test_stop.parameters.less_than.sensor_index = sensor_index;
+    test_stop.parameters.less_than.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_3_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 10);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint32_t value = (uint32_t)atoi((char *)addr);
+
+    // VERIFY UNPACK ERR
+    if (value == 0)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_TIME_DELAY;
+    test_stop.parameters.time_delay.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_4_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_DISTANCE_UP;
+    test_stop.parameters.distance_up.sensor_index = sensor_index;
+    test_stop.parameters.distance_up.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_5_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_DISTANCE_DOWN;
+    test_stop.parameters.distance_down.sensor_index = sensor_index;
+    test_stop.parameters.distance_down.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_6_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_PERCENT_DROP;
+    test_stop.parameters.percent_drop.sensor_index = sensor_index;
+    test_stop.parameters.percent_drop.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_7_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_PERCENT_STRAIN;
+    test_stop.parameters.percent_strain.sensor_index = sensor_index;
+    test_stop.parameters.percent_strain.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_8_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 11);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    double value = atof((char *)addr + 1);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (value < 0.001))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_PERCENT_STRESS_DROP;
+    test_stop.parameters.percent_stress_drop.sensor_index = sensor_index;
+    test_stop.parameters.percent_stress_drop.value = value;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p4_9_stop_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 0);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_stop_t test_stop;
+    test_stop.condition = STOP_CONDITION_OPERATOR_STOP;
+
+    esp_err_t err3 = new_test_set_stop(&test_stop);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ███████╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗██╔════╝
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝███████╗
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝ ╚════██║
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║     ███████║
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚══════╝
+
+*/
+
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗  ██████╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗██╔════╝
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝███████╗
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝ ██╔═══██╗
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║     ╚██████╔╝
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝      ╚═════╝
+
+*/
+
+void new_test_p6_graph_received_cb(msg_t *msg)
+{
+
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 2);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    axis_option_t x_axis_option;
+    axis_option_t y_axis_option;
+    esp_err_t err1 = new_test_get_graph_option_from_combobox(*addr, &x_axis_option);
+    esp_err_t err2 = new_test_get_graph_option_from_combobox(*(addr + 1), &y_axis_option);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (err2 != ESP_OK))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_graph_t test_graph;
+    test_graph.x_axis_option = x_axis_option;
+    test_graph.y_axis_option = y_axis_option;
+
+    esp_err_t err3 = new_test_set_graph(&test_graph);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+
+/*
+███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗    ██████╗ ███████╗
+████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██║
+██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║       ██████╔╝    ██╔╝
+██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝    ██╔╝
+██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║       ██║        ██║
+╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝        ╚═╝
+
+*/
+void new_test_p7_1_start_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 0);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_start_t test_start;
+    test_start.condition = START_CONDITION_TRIGGER_IMMEDIATELY;
+
+    esp_err_t err3 = new_test_set_start(&test_start);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p7_2_start_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 10);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint32_t value = (uint32_t)atoi((char *)addr);
+
+    // VERIFY UNPACK ERR
+    if (value == 0)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_start_t test_start;
+    test_start.condition = START_CONDITION_TIME_DELAY;
+    test_start.parameters.time_delay.value = value;
+
+    esp_err_t err3 = new_test_set_start(&test_start);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p7_3_start_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 23);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    first_point_taken_at_t first_point_taken_at;
+    double value = atof((char *)addr + 2);
+    double current_value = atof((char *)addr + 13);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err2 = new_test_get_start_first_point_from_multiradio(*(addr + 1), &first_point_taken_at);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (err2 != ESP_OK))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_start_t test_start;
+    test_start.condition = START_CONDITION_GREATER_THAN;
+    test_start.parameters.greater_than.sensor_index = sensor_index;
+    test_start.parameters.greater_than.value = value;
+    test_start.parameters.greater_than.current_value = current_value;
+    test_start.parameters.greater_than.first_point_taken_at = first_point_taken_at;
+
+    esp_err_t err3 = new_test_set_start(&test_start);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p7_3_trigger_input_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 1);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    new_test_start_GreaterThan_set_sensor_index(sensor_index);
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p7_4_start_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 23);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    first_point_taken_at_t first_point_taken_at;
+    double value = atof((char *)addr + 2);
+    double current_value = atof((char *)addr + 13);
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err2 = new_test_get_start_first_point_from_multiradio(*(addr + 1), &first_point_taken_at);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK) || (err2 != ESP_OK))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    test_start_t test_start;
+    test_start.condition = START_CONDITION_LESS_THAN;
+    test_start.parameters.less_than.sensor_index = sensor_index;
+    test_start.parameters.less_than.value = value;
+    test_start.parameters.less_than.current_value = current_value;
+    test_start.parameters.less_than.first_point_taken_at = first_point_taken_at;
+
+    esp_err_t err3 = new_test_set_start(&test_start);
+    if (err3 != ESP_OK)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+void new_test_p7_4_trigger_input_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 1);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    uint8_t sensor_index;
+    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+
+    // VERIFY UNPACK ERR
+    if ((err1 != ESP_OK))
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        goto end;
+    }
+
+    // STORE DATA
+    new_test_start_LessThan_set_sensor_index(sensor_index);
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
+}
+/*
     ███████╗███████╗███╗   ██╗███████╗ ██████╗ ██████╗     ██╗   ██╗███╗   ██╗██╗████████╗     ██████╗██╗  ██╗ █████╗ ███╗   ██╗ ██████╗ ███████╗██████╗
     ██╔════╝██╔════╝████╗  ██║██╔════╝██╔═══██╗██╔══██╗    ██║   ██║████╗  ██║██║╚══██╔══╝    ██╔════╝██║  ██║██╔══██╗████╗  ██║██╔════╝ ██╔════╝██╔══██╗
     ███████╗█████╗  ██╔██╗ ██║███████╗██║   ██║██████╔╝    ██║   ██║██╔██╗ ██║██║   ██║       ██║     ███████║███████║██╔██╗ ██║██║  ███╗█████╗  ██║  ██║
@@ -694,64 +1792,6 @@ void sensor_unit_changed(msg_t *msg)
     nextion_1_home_write_unitps(index, sensor_get_unitps_str(index));
     nextion_1_calibration_write_range(index, sensor_get_range(index));
     nextion_1_calibration_write_unit(index, sensor_get_unit_str(index));
-}
-
-/*
-    ██╗     ██╗███╗   ███╗██╗████████╗███████╗    ███████╗███╗   ██╗ █████╗ ██████╗ ██╗     ███████╗██████╗
-    ██║     ██║████╗ ████║██║╚══██╔══╝██╔════╝    ██╔════╝████╗  ██║██╔══██╗██╔══██╗██║     ██╔════╝██╔══██╗
-    ██║     ██║██╔████╔██║██║   ██║   ███████╗    █████╗  ██╔██╗ ██║███████║██████╔╝██║     █████╗  ██║  ██║
-    ██║     ██║██║╚██╔╝██║██║   ██║   ╚════██║    ██╔══╝  ██║╚██╗██║██╔══██║██╔══██╗██║     ██╔══╝  ██║  ██║
-    ███████╗██║██║ ╚═╝ ██║██║   ██║   ███████║    ███████╗██║ ╚████║██║  ██║██████╔╝███████╗███████╗██████╔╝
-    ╚══════╝╚═╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚═════╝
-
-*/
-void sensor_limits_enabled(msg_t *msg)
-{
-    // get index
-    int index = msg->content.i32;
-
-    // VERIFY INDEX IN RANGE
-    bool in_range = helper_index_in_range(index);
-    if (!in_range)
-    {
-        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
-        return;
-    }
-
-    // set on ram
-    sensor_set_limits(index, true);
-
-    // set on nvs
-    config_sensor_save(index, sensor_get_configuration(index));
-}
-
-/*
-██╗     ██╗███╗   ███╗██╗████████╗███████╗    ██████╗ ██╗███████╗ █████╗ ██████╗ ██╗     ███████╗██████╗
-██║     ██║████╗ ████║██║╚══██╔══╝██╔════╝    ██╔══██╗██║██╔════╝██╔══██╗██╔══██╗██║     ██╔════╝██╔══██╗
-██║     ██║██╔████╔██║██║   ██║   ███████╗    ██║  ██║██║███████╗███████║██████╔╝██║     █████╗  ██║  ██║
-██║     ██║██║╚██╔╝██║██║   ██║   ╚════██║    ██║  ██║██║╚════██║██╔══██║██╔══██╗██║     ██╔══╝  ██║  ██║
-███████╗██║██║ ╚═╝ ██║██║   ██║   ███████║    ██████╔╝██║███████║██║  ██║██████╔╝███████╗███████╗██████╔╝
-╚══════╝╚═╝╚═╝     ╚═╝╚═╝   ╚═╝   ╚══════╝    ╚═════╝ ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝╚═════╝
-
-*/
-void sensor_limits_disabled(msg_t *msg)
-{
-    // get index
-    int index = msg->content.i32;
-
-    // VERIFY INDEX IN RANGE
-    bool in_range = helper_index_in_range(index);
-    if (!in_range)
-    {
-        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
-        return;
-    }
-
-    // set on ram
-    sensor_set_limits(index, false);
-
-    // set on nvs
-    config_sensor_save(index, sensor_get_configuration(index));
 }
 
 /*
@@ -871,97 +1911,30 @@ void nextion_update_cb(msg_t *msg)
             break;
         }
     }
+    else if (page == PAGE_NEW_TEST_P7_3)
+    {
+        int index;
+        new_test_start_GreaterThan_get_sensor_index(&index);
+        bool is_enabled = sensor_is_enabled(index);
+        bool is_calibrated = sensor_is_calibrated(index);
+        bool is_free = sensor_is_free(index);
+
+        char *content = (is_enabled && is_calibrated && is_free) ? sensor_get_real_str(index) : "";
+        nextion_1_new_test_p7_3_write_current_value(content);
+    }
+    else if (page == PAGE_NEW_TEST_P7_4)
+    {
+        int index;
+        new_test_start_LessThan_get_sensor_index(&index);
+        bool is_enabled = sensor_is_enabled(index);
+        bool is_calibrated = sensor_is_calibrated(index);
+        bool is_free = sensor_is_free(index);
+
+        char *content = (is_enabled && is_calibrated && is_free) ? sensor_get_real_str(index) : "";
+        nextion_1_new_test_p7_4_write_current_value(content);
+    }
     else
     {
         ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
     }
-}
-
-/*
-    ███╗   ██╗███████╗██╗    ██╗    ████████╗███████╗███████╗████████╗
-    ████╗  ██║██╔════╝██║    ██║    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
-    ██╔██╗ ██║█████╗  ██║ █╗ ██║       ██║   █████╗  ███████╗   ██║
-    ██║╚██╗██║██╔══╝  ██║███╗██║       ██║   ██╔══╝  ╚════██║   ██║
-    ██║ ╚████║███████╗╚███╔███╔╝       ██║   ███████╗███████║   ██║
-    ╚═╝  ╚═══╝╚══════╝ ╚══╝╚══╝        ╚═╝   ╚══════╝╚══════╝   ╚═╝
-
-*/
-
-void test_execute_cb(msg_t *msg)
-{
-    // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
-    bool is_runnig = test_is_running();
-    RETURN_IF_TRUE(!is_runnig);
-
-    int index1 = test_get_index1();
-    int index2 = test_get_index2();
-    uint8_t row = test_get_row();
-    bool res = test_execute(sensor_get_real(index1), sensor_get_real(index2));
-    if (res == true)
-    {
-        switch (row)
-        {
-        case 0:
-            nextion_1_newtest_write_table01(sensor_get_real_str(index2));
-            break;
-        case 1:
-            nextion_1_newtest_write_table11(sensor_get_real_str(index2));
-            break;
-        case 2:
-            nextion_1_newtest_write_table21(sensor_get_real_str(index2));
-            break;
-        case 3:
-            nextion_1_newtest_write_table31(sensor_get_real_str(index2));
-            break;
-        case 4:
-            nextion_1_newtest_write_table41(sensor_get_real_str(index2));
-            break;
-        case 5:
-            nextion_1_newtest_write_table51(sensor_get_real_str(index2));
-            break;
-        case 6:
-            nextion_1_newtest_write_table61(sensor_get_real_str(index2));
-            break;
-        case 7:
-            nextion_1_newtest_write_table71(sensor_get_real_str(index2));
-            break;
-        case 8:
-            nextion_1_newtest_write_table81(sensor_get_real_str(index2));
-            break;
-        case 9:
-            nextion_1_newtest_write_table91(sensor_get_real_str(index2));
-            test_stop();
-            break;
-        default:
-            break;
-        }
-    }
-}
-void new_test_set_index_1_cb(msg_t *msg)
-{
-    // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
-    int index = *(uint8_t *)(msg->content.addr);
-    test_set_index1(index);
-    free(msg->content.addr);
-}
-void new_test_set_index2_cb(msg_t *msg)
-{
-    // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
-    int index = *(uint8_t *)(msg->content.addr);
-    test_set_index2(index);
-    free(msg->content.addr);
-}
-void new_test_start_cb(msg_t *msg)
-{
-    // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
-    test_start();
-}
-void new_test_stop_cb(msg_t *msg)
-{
-    // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
-    test_stop();
-}
-void new_test_download_cb(msg_t *msg)
-{
-    // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
 }
