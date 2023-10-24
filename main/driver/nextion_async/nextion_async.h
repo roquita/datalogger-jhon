@@ -85,10 +85,14 @@ nextion_res_t nextion_set_path_from_objName(nextion_t *dev, char *pageName, char
 nextion_res_t nextion_set_pco_from_objName(nextion_t *dev, char *pageName, char *objName, uint32_t content);
 nextion_res_t nextion_set_val_from_objName(nextion_t *dev, char *pageName, char *objName, int32_t content);
 nextion_res_t nextion_set_txt_from_objName(nextion_t *dev, char *pageName, char *objName, char *content);
+nextion_res_t nextion_set_en_from_objName_local(nextion_t *dev, char *objName, bool content)
 
 nextion_res_t nextion_set_path_from_objId(nextion_t *dev, int pageIndex, int objId, char *content);
 nextion_res_t nextion_set_pco_from_objId(nextion_t *dev, int pageIndex, int objId, uint32_t content);
 nextion_res_t nextion_set_val_from_objId(nextion_t *dev, int pageIndex, int objId, int32_t content);
 nextion_res_t nextion_set_txt_from_objId(nextion_t *dev, int pageIndex, int objId, char *content);
+nextion_res_t nextion_append_txt_from_objId(nextion_t *dev, int pageIndex, int objId, char *content);
+nextion_res_t nextion_set_en_from_objId(nextion_t *dev, int pageIndex, int objId, bool en);
 
 nextion_res_t nextion_goto_page_from_pageIndex(nextion_t *dev, uint8_t pageIndex);
+nextion_res_t nextion_add_single_value_to_waveform(nextion_t *dev, int objId, int channel, uint8_t content);

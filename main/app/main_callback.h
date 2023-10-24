@@ -118,3 +118,6 @@ void sensor_class_received_cb(msg_t *msg);
 
 // NEXTION-TIMER
 void nextion_update_cb(msg_t *msg);
+
+// CURRENT TEST TIMER
+void test_timer_cb(msg_t *msg);

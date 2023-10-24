@@ -230,6 +230,26 @@ static nextion_res_t nextion_set_u32_attribute_from_objName(nextion_t *dev, char
 
     return NEXTION_OK;
 }
+static nextion_res_t nextion_set_u32_attribute_from_objName_local(nextion_t *dev, char *objName, char *attr, uint32_t content)
+{
+    char buff[100] = {0};
+    int size = snprintf(buff, sizeof(buff), "%s.%s=%lu\xff\xff\xff", objName, attr, content);
+
+    if (size < 0 || size >= sizeof(buff))
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    int n = uart_write_bytes(dev->uart_num, buff, size);
+    if (n != size)
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    return NEXTION_OK;
+}
 static nextion_res_t nextion_set_i32_attribute_from_objName(nextion_t *dev, char *pageName, char *objName, char *attr, int32_t content)
 {
     char buff[100] = {0};
@@ -254,6 +274,26 @@ static nextion_res_t nextion_set_string_attribute_from_objId(nextion_t *dev, int
 {
     char buff[100] = {0};
     int size = snprintf(buff, sizeof(buff), "p[%i].b[%i].%s=\"%s\"\xff\xff\xff", pageId, objId, attr, content);
+
+    if (size < 0 || size >= sizeof(buff))
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    int n = uart_write_bytes(dev->uart_num, buff, size);
+    if (n != size)
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    return NEXTION_OK;
+}
+static nextion_res_t nextion_append_string_attribute_from_objId(nextion_t *dev, int pageId, int objId, char *attr, char *content)
+{
+    char buff[100] = {0};
+    int size = snprintf(buff, sizeof(buff), "p[%i].b[%i].%s+=\"%s\"\xff\xff\xff", pageId, objId, attr, content);
 
     if (size < 0 || size >= sizeof(buff))
     {
@@ -368,6 +408,18 @@ nextion_res_t nextion_set_txt_from_objName(nextion_t *dev, char *pageName, char 
 
     return NEXTION_OK;
 }
+nextion_res_t nextion_set_en_from_objName_local(nextion_t *dev, char *objName, bool content)
+{
+    nextion_res_t res;
+    res = nextion_set_u32_attribute_from_objName_local(dev, objName, "en", content ? 1 : 0);
+    if (res != NEXTION_OK)
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    return NEXTION_OK;
+}
 
 /*
 ███████╗██████╗  ██████╗ ███╗   ███╗     ██████╗ ██████╗      ██╗    ██╗██████╗
@@ -427,6 +479,30 @@ nextion_res_t nextion_set_txt_from_objId(nextion_t *dev, int pageIndex, int objI
 
     return NEXTION_OK;
 }
+nextion_res_t nextion_append_txt_from_objId(nextion_t *dev, int pageIndex, int objId, char *content)
+{
+    nextion_res_t res;
+    res = nextion_append_string_attribute_from_objId(dev, pageIndex, objId, "txt", content);
+    if (res != NEXTION_OK)
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    return NEXTION_OK;
+}
+nextion_res_t nextion_set_en_from_objId(nextion_t *dev, int pageIndex, int objId, bool en)
+{
+    nextion_res_t res;
+    res = nextion_set_u32_attribute_from_objId(dev, pageIndex, objId, "en", en ? 1 : 0);
+    if (res != NEXTION_OK)
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    return NEXTION_OK;
+}
 
 /*
  ██████╗ ██████╗ ███████╗██████╗  █████╗ ████████╗██╗ ██████╗ ███╗   ██╗ █████╗ ██╗          ██████╗ ██████╗ ███╗   ███╗███╗   ███╗ █████╗ ███╗   ██╗██████╗ ███████╗
@@ -440,8 +516,28 @@ nextion_res_t nextion_set_txt_from_objId(nextion_t *dev, int pageIndex, int objI
 
 nextion_res_t nextion_goto_page_from_pageIndex(nextion_t *dev, uint8_t pageIndex)
 {
-    char buff[20] = {0};
+    char buff[30] = {0};
     int size = snprintf(buff, sizeof(buff), "page %u\xff\xff\xff", pageIndex);
+
+    if (size < 0 || size >= sizeof(buff))
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    int n = uart_write_bytes(dev->uart_num, buff, size);
+    if (n != size)
+    {
+        ESP_LOGE(TAG, "file:%s,line:%i", __FILE__, __LINE__);
+        return NEXTION_ERROR;
+    }
+
+    return NEXTION_OK;
+}
+nextion_res_t nextion_add_single_value_to_waveform(nextion_t *dev, int objId, int channel, uint8_t content)
+{
+    char buff[30] = {0};
+    int size = snprintf(buff, sizeof(buff), "add %i,%i,%u\xff\xff\xff", objId, channel, content);
 
     if (size < 0 || size >= sizeof(buff))
     {

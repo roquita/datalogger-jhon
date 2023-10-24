@@ -29,6 +29,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 10,
         .calibration_Counts = 11,
         .calibration_Calibrate = 56,
+        .current_test_p2_Value = 22,
     },
     {
         .home_Name = 10,
@@ -46,6 +47,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 17,
         .calibration_Counts = 18,
         .calibration_Calibrate = 57,
+        .current_test_p2_Value = 23,
     },
     {
         .home_Name = 17,
@@ -63,6 +65,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 23,
         .calibration_Counts = 24,
         .calibration_Calibrate = 58,
+        .current_test_p2_Value = 24,
     },
     {
         .home_Name = 24,
@@ -80,6 +83,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 29,
         .calibration_Counts = 30,
         .calibration_Calibrate = 59,
+        .current_test_p2_Value = 25,
     },
     {
         .home_Name = 31,
@@ -97,6 +101,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 35,
         .calibration_Counts = 36,
         .calibration_Calibrate = 60,
+        .current_test_p2_Value = 26,
     },
     {
         .home_Name = 38,
@@ -114,6 +119,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 41,
         .calibration_Counts = 42,
         .calibration_Calibrate = 61,
+        .current_test_p2_Value = 27,
     },
     {
         .home_Name = 45,
@@ -131,6 +137,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 47,
         .calibration_Counts = 48,
         .calibration_Calibrate = 62,
+        .current_test_p2_Value = 28,
     },
     {
         .home_Name = 52,
@@ -148,6 +155,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 53,
         .calibration_Counts = 54,
         .calibration_Calibrate = 63,
+        .current_test_p2_Value = 29,
     }};
 
 page_t page = PAGE_HOME;
@@ -1102,4 +1110,62 @@ void nextion_1_message_write_nextpage(page_t content)
 void nextion_1_message_write_content_color(uint32_t content)
 {
     nextion_set_pco_from_objId(&nextion_1, PAGE_MESSAGE, 2, content);
+}
+/*
+ ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗  ██╗
+██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗███║
+██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║       ██████╔╝╚██║
+██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝  ██║
+╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║       ██║      ██║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝      ╚═╝
+
+*/
+
+/*
+ ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
+██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██╗
+██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║       ██████╔╝ █████╔╝
+██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝ ██╔═══╝
+╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║       ██║     ███████╗
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚══════╝
+
+*/
+void nextion_1_current_test_p2_append_index(char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, content);
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "----");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r");
+}
+void nextion_1_current_test_p2_append_time(char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, content);
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "----");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r");
+}
+void nextion_1_current_test_p2_append_sensor(int index, char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, content);
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, "----");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, "\r");
+}
+/*
+ ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
+██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██╗
+██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║       ██████╔╝ █████╔╝
+██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝  ╚═══██╗
+╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║       ██║     ██████╔╝
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚═════╝
+
+*/
+void nextion_1_current_test_p3_write_waveform(uint8_t content)
+{
+    nextion_add_single_value_to_waveform(&nextion_1, 8, 0, content);
+}
+void nextion_1_current_test_p3_append_value(int content)
+{
+    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, content);
+    nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
 }

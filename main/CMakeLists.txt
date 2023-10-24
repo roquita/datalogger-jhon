@@ -9,6 +9,6 @@ idf_component_register(SRCS ${C_SOURCES}  ${CPP_SOURCES}
                     "app" "app/calibration"
                      "app/gui" "app/sensor" 
                      "app/testing" "app/usb"
-                     "app/configuration" "app/testing/current_test"
-                     "app/testing/new_test" "app/testing/previous_test"
+                     "app/configuration" 
+                     "app/time"
                    )

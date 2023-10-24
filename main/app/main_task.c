@@ -243,6 +243,9 @@ void main_task(void *arg)
         else if (type == NEXTION_UPDATE)
             nextion_update_cb(&msg);
 
+        else if (type == TEST_TIMER)
+            test_timer_cb(&msg);
+
         else
         {
             ESP_LOGE(TAG, "file:%s,line:%u", __FILE__, __LINE__);

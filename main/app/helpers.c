@@ -49,6 +49,7 @@ bool helper_unit_in_range(uint8_t unit_u8, sensor_type_t type)
     }
     else
     {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         return false;
     }
 }
@@ -123,5 +124,3 @@ double helper_get_fc(sensor_unit_t old_unit, sensor_unit_t new_unit, sensor_type
 char *sensor_unit_str[] = {"cm", "in", "mm", "kN", "lbf", "N",
                            "kgf", "kPa", "psi", "ksf", "MPa",
                            "kgf/cm2", "cm3", "in3"};
-
-

@@ -48,19 +48,20 @@ void sensor_clear_tara(int index)
 {
     sensor[index].config.tara_val = 0.0;
 }
-double sensor_get_real(int index)
+double sensor_get_real(int index, bool use_tara)
 {
     sensor_class_t class = sensor[index].class;
     sensor_dev_t *s = sensor + index;
+    double tara = use_tara ? s->config.tara_val : 0.0;
     if (class == CLASS_D)
-        return (s->data.real - s->config.tara_val) * s->config.unit_fc;
+        return (s->data.real - tara) * s->config.unit_fc;
     else
         return s->data.real;
 }
-char *sensor_get_real_str(int index)
+char *sensor_get_real_str(int index, bool use_tara)
 {
     int num_decimals = sensor_get_num_decimals(index);
-    double real = sensor_get_real(index);
+    double real = sensor_get_real(index, use_tara);
     snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, real);
     return buffer;
 }
