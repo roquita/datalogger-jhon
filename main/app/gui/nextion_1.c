@@ -29,7 +29,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 10,
         .calibration_Counts = 11,
         .calibration_Calibrate = 56,
-        .current_test_p2_Value = 22,
+        .currenttestp1_Name = 34,
+        .currenttestp1_Data = 35,
+        .currenttestp1_Dataps = 37,
+        .currenttestp1_Unit = 36,
+        .currenttestp1_Unitps = 38,
+        .currenttestp2_Unit = 41,
+        .currenttestp2_Data = 22,
     },
     {
         .home_Name = 10,
@@ -47,7 +53,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 17,
         .calibration_Counts = 18,
         .calibration_Calibrate = 57,
-        .current_test_p2_Value = 23,
+        .currenttestp1_Name = 39,
+        .currenttestp1_Data = 40,
+        .currenttestp1_Dataps = 42,
+        .currenttestp1_Unit = 41,
+        .currenttestp1_Unitps = 43,
+        .currenttestp2_Unit = 42,
+        .currenttestp2_Data = 23,
     },
     {
         .home_Name = 17,
@@ -65,7 +77,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 23,
         .calibration_Counts = 24,
         .calibration_Calibrate = 58,
-        .current_test_p2_Value = 24,
+        .currenttestp1_Name = 44,
+        .currenttestp1_Data = 45,
+        .currenttestp1_Dataps = 47,
+        .currenttestp1_Unit = 46,
+        .currenttestp1_Unitps = 48,
+        .currenttestp2_Unit = 43,
+        .currenttestp2_Data = 24,
     },
     {
         .home_Name = 24,
@@ -83,7 +101,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 29,
         .calibration_Counts = 30,
         .calibration_Calibrate = 59,
-        .current_test_p2_Value = 25,
+        .currenttestp1_Name = 49,
+        .currenttestp1_Data = 50,
+        .currenttestp1_Dataps = 52,
+        .currenttestp1_Unit = 51,
+        .currenttestp1_Unitps = 53,
+        .currenttestp2_Unit = 44,
+        .currenttestp2_Data = 25,
     },
     {
         .home_Name = 31,
@@ -101,7 +125,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 35,
         .calibration_Counts = 36,
         .calibration_Calibrate = 60,
-        .current_test_p2_Value = 26,
+        .currenttestp1_Name = 14,
+        .currenttestp1_Data = 15,
+        .currenttestp1_Dataps = 17,
+        .currenttestp1_Unit = 16,
+        .currenttestp1_Unitps = 18,
+        .currenttestp2_Unit = 45,
+        .currenttestp2_Data = 26,
     },
     {
         .home_Name = 38,
@@ -119,7 +149,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 41,
         .calibration_Counts = 42,
         .calibration_Calibrate = 61,
-        .current_test_p2_Value = 27,
+        .currenttestp1_Name = 19,
+        .currenttestp1_Data = 20,
+        .currenttestp1_Dataps = 22,
+        .currenttestp1_Unit = 21,
+        .currenttestp1_Unitps = 23,
+        .currenttestp2_Unit = 46,
+        .currenttestp2_Data = 27,
     },
     {
         .home_Name = 45,
@@ -137,7 +173,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 47,
         .calibration_Counts = 48,
         .calibration_Calibrate = 62,
-        .current_test_p2_Value = 28,
+        .currenttestp1_Name = 24,
+        .currenttestp1_Data = 25,
+        .currenttestp1_Dataps = 27,
+        .currenttestp1_Unit = 26,
+        .currenttestp1_Unitps = 28,
+        .currenttestp2_Unit = 47,
+        .currenttestp2_Data = 28,
     },
     {
         .home_Name = 52,
@@ -155,7 +197,13 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .calibration_Value = 53,
         .calibration_Counts = 54,
         .calibration_Calibrate = 63,
-        .current_test_p2_Value = 29,
+        .currenttestp1_Name = 29,
+        .currenttestp1_Data = 30,
+        .currenttestp1_Dataps = 32,
+        .currenttestp1_Unit = 31,
+        .currenttestp1_Unitps = 33,
+        .currenttestp2_Unit = 48,
+        .currenttestp2_Data = 29,
     }};
 
 page_t page = PAGE_HOME;
@@ -1120,6 +1168,59 @@ void nextion_1_message_write_content_color(uint32_t content)
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝      ╚═╝
 
 */
+// TITLE
+void nextion_1_current_test_p1_write_title(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 7, content);
+}
+
+// SENSOR NAME
+void nextion_1_current_test_p1_write_sensor_name(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, IdSx[index].currenttestp1_Name, content);
+}
+
+// WRITE DATA
+void nextion_1_current_test_p1_write_data(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, IdSx[index].currenttestp1_Data, content);
+}
+
+// WRITE DATAPS
+void nextion_1_current_test_p1_write_dataps(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, IdSx[index].currenttestp1_Dataps, content);
+}
+
+// UNIT
+void nextion_1_current_test_p1_write_unit(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, IdSx[index].currenttestp1_Unit, content);
+}
+
+// UNITPS
+void nextion_1_current_test_p1_write_unitps(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, IdSx[index].currenttestp1_Unitps, content);
+}
+
+// STATUS
+void nextion_1_current_test_p1_write_status(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 12, content);
+}
+
+// POINTs
+void nextion_1_current_test_p1_write_points(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 6, content);
+}
+
+// TIME
+void nextion_1_current_test_p1_write_time(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 13, content);
+}
 
 /*
  ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
@@ -1130,6 +1231,19 @@ void nextion_1_message_write_content_color(uint32_t content)
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚══════╝
 
 */
+// TITLE
+void nextion_1_current_test_p2_write_title(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 9, content);
+}
+
+// UNIT
+void nextion_1_current_test_p2_write_unit(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Unit, content);
+}
+
+// TABLE INDEX
 void nextion_1_current_test_p2_append_index(char *content)
 {
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, content);
@@ -1137,6 +1251,12 @@ void nextion_1_current_test_p2_append_index(char *content)
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "----");
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r");
 }
+void nextion_1_current_test_p2_clean_index()
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "");
+}
+
+// TABLE TIME
 void nextion_1_current_test_p2_append_time(char *content)
 {
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, content);
@@ -1144,12 +1264,40 @@ void nextion_1_current_test_p2_append_time(char *content)
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "----");
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r");
 }
-void nextion_1_current_test_p2_append_sensor(int index, char *content)
+void nextion_1_current_test_p2_clean_time()
 {
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, content);
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, "\r");
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, "----");
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].current_test_p2_Value, "\r");
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "");
+}
+
+// TABLE DATA
+void nextion_1_current_test_p2_append_data(int index, char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, content);
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "----");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "\r");
+}
+void nextion_1_current_test_p2_clean_data(int index)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "");
+}
+
+// STATUS
+void nextion_1_current_test_p2_write_status(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 35, content);
+}
+
+// POINTs
+void nextion_1_current_test_p2_write_points(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 33, content);
+}
+
+// TIME
+void nextion_1_current_test_p2_write_time(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 36, content);
 }
 /*
  ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
@@ -1160,12 +1308,48 @@ void nextion_1_current_test_p2_append_sensor(int index, char *content)
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚═════╝
 
 */
+
+// TITLE
+void nextion_1_current_test_p3_write_title(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 16, content);
+}
+
+/*
 void nextion_1_current_test_p3_write_waveform(uint8_t content)
 {
     nextion_add_single_value_to_waveform(&nextion_1, 8, 0, content);
 }
-void nextion_1_current_test_p3_append_value(int content)
+*/
+
+// CLEAN DATA
+void nextion_1_current_test_p3_clean_data()
+{
+    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, 150);
+    nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
+}
+
+// APPEND DATA
+void nextion_1_current_test_p3_append_data(int content)
 {
     nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, content);
     nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
+}
+
+// STATUS
+void nextion_1_current_test_p3_write_status(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 21, content);
+}
+
+// POINTs
+void nextion_1_current_test_p3_write_points(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 19, content);
+}
+
+// TIME
+void nextion_1_current_test_p3_write_time(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 22, content);
 }

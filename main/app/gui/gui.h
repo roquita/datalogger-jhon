@@ -18,7 +18,13 @@ typedef struct
     int calibration_Value;
     int calibration_Counts;
     int calibration_Calibrate;
-    int current_test_p2_Value;
+    int currenttestp1_Name;
+    int currenttestp1_Data;
+    int currenttestp1_Dataps;
+    int currenttestp1_Unit;
+    int currenttestp1_Unitps;
+    int currenttestp2_Unit;
+    int currenttestp2_Data;
 } IdSx_t;
 
 void nextion_1_init();
@@ -205,6 +211,32 @@ void nextion_1_message_write_content_color(uint32_t content);
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝      ╚═╝
 
 */
+// TITLE
+void nextion_1_current_test_p1_write_title(char *content);
+
+// SENSOR NAME
+void nextion_1_current_test_p1_write_sensor_name(int index, char *content);
+
+// WRITE DATA
+void nextion_1_current_test_p1_write_data(int index, char *content);
+
+// WRITE DATAPS
+void nextion_1_current_test_p1_write_dataps(int index, char *content);
+
+// UNIT
+void nextion_1_current_test_p1_write_unit(int index, char *content);
+
+// UNITPS
+void nextion_1_current_test_p1_write_unitps(int index, char *content);
+
+// STATUS
+void nextion_1_current_test_p1_write_status(char *content);
+
+// POINTs
+void nextion_1_current_test_p1_write_points(char *content);
+
+// TIME
+void nextion_1_current_test_p1_write_time(char *content);
 
 /*
  ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
@@ -215,9 +247,32 @@ void nextion_1_message_write_content_color(uint32_t content);
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚══════╝
 
 */
+// TITLE
+void nextion_1_current_test_p2_write_title(char *content);
+
+// UNIT
+void nextion_1_current_test_p2_write_unit(int index, char *content);
+
+// TABLE INDEX
 void nextion_1_current_test_p2_append_index(char *content);
+void nextion_1_current_test_p2_clean_index();
+
+// TABLE TIME
 void nextion_1_current_test_p2_append_time(char *content);
-void nextion_1_current_test_p2_append_sensor(int index, char *content);
+void nextion_1_current_test_p2_clean_time();
+
+// TABLE DATA
+void nextion_1_current_test_p2_append_data(int index, char *content);
+void nextion_1_current_test_p2_clean_data(int index);
+
+// STATUS
+void nextion_1_current_test_p2_write_status(char *content);
+
+// POINTs
+void nextion_1_current_test_p2_write_points(char *content);
+
+// TIME
+void nextion_1_current_test_p2_write_time(char *content);
 
 /*
  ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
@@ -228,6 +283,21 @@ void nextion_1_current_test_p2_append_sensor(int index, char *content);
  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚═════╝
 
 */
-void nextion_1_current_test_p3_write_waveform(uint8_t content);
-void nextion_1_current_test_p3_append_value(int content);
 
+// TITLE
+void nextion_1_current_test_p3_write_title(char *content);
+
+// void nextion_1_current_test_p3_write_waveform(uint8_t content);
+
+//  DATA
+void nextion_1_current_test_p3_clean_data();
+void nextion_1_current_test_p3_append_data(int content);
+
+// STATUS
+void nextion_1_current_test_p3_write_status(char *content);
+
+// POINTs
+void nextion_1_current_test_p3_write_points(char *content);
+
+// TIME
+void nextion_1_current_test_p3_write_time(char *content);

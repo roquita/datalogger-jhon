@@ -83,7 +83,8 @@ typedef enum
 
 typedef enum
 {
-    TEST_UNCONFIGURED,
+    TEST_VOID = 0,
+    TEST_INITIALIZED,
     TEST_CONFIGURED,
     TEST_RUNNING,
     TEST_DONE,
