@@ -9,7 +9,7 @@ typedef struct
     int home_Unit;
     int home_Unitps;
     int home_Tara;
-    int home_Use;
+    int home_Status;
     int calibration_Switch;
     int calibration_Name;
     int calibration_Range;
@@ -23,15 +23,23 @@ typedef struct
     int currenttestp1_Dataps;
     int currenttestp1_Unit;
     int currenttestp1_Unitps;
+    int currenttestp2_Name;
     int currenttestp2_Unit;
     int currenttestp2_Data;
 } IdSx_t;
 
-void nextion_1_init();
+/*
+████████╗██╗███╗   ███╗███████╗██████╗
+╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
+   ██║   ██║██╔████╔██║█████╗  ██████╔╝
+   ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
+   ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
+   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+
+*/
+void nextion_1_init_timer();
 void nextion_1_start_timer();
 void nextion_1_stop_timer();
-void nextion_1_set_page(page_t new_page);
-page_t nextion_1_get_page();
 
 /*
  ██████╗ ███████╗███╗   ██╗███████╗██████╗  █████╗ ██╗
@@ -42,8 +50,23 @@ page_t nextion_1_get_page();
  ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
 
 */
+void nextion_1_init_hardware();
+void nextion_1_set_page(page_t new_page);
+page_t nextion_1_get_page();
+void nextion_1_goto_page(page_t page);
 
-void nextion_1_change_page(page_t page);
+/*
+██╗███╗   ██╗████████╗██████╗  ██████╗
+██║████╗  ██║╚══██╔══╝██╔══██╗██╔═══██╗
+██║██╔██╗ ██║   ██║   ██████╔╝██║   ██║
+██║██║╚██╗██║   ██║   ██╔══██╗██║   ██║
+██║██║ ╚████║   ██║   ██║  ██║╚██████╔╝
+╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝
+
+*/
+
+// WRITE LOADING
+void nextion_1_intro_write_loading(int content);
 
 /*
 ██╗  ██╗ ██████╗ ███╗   ███╗███████╗
@@ -69,6 +92,9 @@ void nextion_1_home_write_unitps(int index, char *content);
 
 // WRITE NAME
 void nextion_1_home_write_name(int index, char *content);
+
+// WRITE STATUS
+void nextion_1_home_write_status(int index, char *content);
 
 /*
  ██████╗ █████╗ ██╗     ██╗██████╗ ██████╗  █████╗ ████████╗██╗ ██████╗ ███╗   ██╗
@@ -106,6 +132,26 @@ void nextion_1_calibration_write_switch(int index, int32_t content);
 
 // WRITE CONTENT
 void nextion_1_calibration_write_counts(int index, char *content);
+
+/*
+██████╗  █████╗ ████████╗███████╗████████╗██╗███╗   ███╗███████╗
+██╔══██╗██╔══██╗╚══██╔══╝██╔════╝╚══██╔══╝██║████╗ ████║██╔════╝
+██║  ██║███████║   ██║   █████╗     ██║   ██║██╔████╔██║█████╗
+██║  ██║██╔══██║   ██║   ██╔══╝     ██║   ██║██║╚██╔╝██║██╔══╝
+██████╔╝██║  ██║   ██║   ███████╗   ██║   ██║██║ ╚═╝ ██║███████╗
+╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝
+
+*/
+
+void nextion_1_datetime_get_rtc_year();
+void nextion_1_datetime_get_rtc_month();
+void nextion_1_datetime_get_rtc_day();
+void nextion_1_datetime_get_rtc_hour();
+void nextion_1_datetime_get_rtc_minute();
+void nextion_1_datetime_get_rtc_second();
+void nextion_1_datetime_get_rtc_dateformat();
+void nextion_1_datetime_get_rtc_timeformat();
+void nextion_1_set_datetime(char *content);
 
 /*
 ██╗███╗   ██╗██████╗ ██╗   ██╗████████╗     ██████╗ █████╗ ██╗     ██╗██████╗     ██████╗ ██████╗
@@ -203,16 +249,18 @@ void nextion_1_message_write_nextpage(page_t content);
 void nextion_1_message_write_content_color(uint32_t content);
 
 /*
- ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗  ██╗
-██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗███║
-██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║       ██████╔╝╚██║
-██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝  ██║
-╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║       ██║      ██║
- ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝      ╚═╝
+██████╗  ██╗     ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗
+██╔══██╗███║    ██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
+██████╔╝╚██║    ██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║
+██╔═══╝  ██║    ██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║
+██║      ██║    ╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║
+╚═╝      ╚═╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝
 
 */
+
 // TITLE
 void nextion_1_current_test_p1_write_title(char *content);
+void nextion_1_current_test_p1_append_title(char *content);
 
 // SENSOR NAME
 void nextion_1_current_test_p1_write_sensor_name(int index, char *content);
@@ -233,22 +281,27 @@ void nextion_1_current_test_p1_write_unitps(int index, char *content);
 void nextion_1_current_test_p1_write_status(char *content);
 
 // POINTs
-void nextion_1_current_test_p1_write_points(char *content);
+void nextion_1_current_test_p1_write_points(int content);
 
 // TIME
 void nextion_1_current_test_p1_write_time(char *content);
 
 /*
- ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
-██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██╗
-██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║       ██████╔╝ █████╔╝
-██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝ ██╔═══╝
-╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║       ██║     ███████╗
- ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚══════╝
+██████╗ ██████╗      ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗
+██╔══██╗╚════██╗    ██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
+██████╔╝ █████╔╝    ██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║
+██╔═══╝ ██╔═══╝     ██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║
+██║     ███████╗    ╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║
+╚═╝     ╚══════╝     ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝
 
 */
+
 // TITLE
 void nextion_1_current_test_p2_write_title(char *content);
+void nextion_1_current_test_p2_append_title(char *content);
+
+// NAME
+void nextion_1_current_test_p2_write_sensor_name(int index, char *content);
 
 // UNIT
 void nextion_1_current_test_p2_write_unit(int index, char *content);
@@ -262,42 +315,56 @@ void nextion_1_current_test_p2_append_time(char *content);
 void nextion_1_current_test_p2_clean_time();
 
 // TABLE DATA
-void nextion_1_current_test_p2_append_data(int index, char *content);
-void nextion_1_current_test_p2_clean_data(int index);
+void nextion_1_current_test_p2_append_sensor_data(int index, char *content);
+void nextion_1_current_test_p2_clean_sensor_data(int index);
 
 // STATUS
 void nextion_1_current_test_p2_write_status(char *content);
 
 // POINTs
-void nextion_1_current_test_p2_write_points(char *content);
+void nextion_1_current_test_p2_write_points(int content);
 
 // TIME
 void nextion_1_current_test_p2_write_time(char *content);
 
 /*
- ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ██████╗ ██████╗
-██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ██╔══██╗╚════██╗
-██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║       ██████╔╝ █████╔╝
-██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║       ██╔═══╝  ╚═══██╗
-╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║       ██║     ██████╔╝
- ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝       ╚═╝     ╚═════╝
+██████╗ ██████╗      ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗
+██╔══██╗╚════██╗    ██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
+██████╔╝ █████╔╝    ██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║
+██╔═══╝  ╚═══██╗    ██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║
+██║     ██████╔╝    ╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║
+╚═╝     ╚═════╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝
 
 */
 
 // TITLE
 void nextion_1_current_test_p3_write_title(char *content);
+void nextion_1_current_test_p3_append_title(char *content);
 
 // void nextion_1_current_test_p3_write_waveform(uint8_t content);
 
 //  DATA
-void nextion_1_current_test_p3_clean_data();
+void nextion_1_current_test_p3_write_slope(int pos, int content);
+void nextion_1_current_test_p3_clean_sensor_data();
 void nextion_1_current_test_p3_append_data(int content);
 
 // STATUS
 void nextion_1_current_test_p3_write_status(char *content);
 
 // POINTs
-void nextion_1_current_test_p3_write_points(char *content);
+void nextion_1_current_test_p3_write_points(int content);
 
 // TIME
 void nextion_1_current_test_p3_write_time(char *content);
+
+// Y axis
+void nextion_1_current_test_p3_write_sensor_name(char *content);
+void nextion_1_current_test_p3_write_sensor_unit(char *content);
+void nextion_1_current_test_p3_write_Y1(char *content);
+void nextion_1_current_test_p3_write_Y2(char *content);
+void nextion_1_current_test_p3_write_Y3(char *content);
+void nextion_1_current_test_p3_write_Y4(char *content);
+void nextion_1_current_test_p3_write_Y5(char *content);
+void nextion_1_current_test_p3_write_Y6(char *content);
+void nextion_1_current_test_p3_write_Y7(char *content);
+void nextion_1_current_test_p3_write_Y8(char *content);

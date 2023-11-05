@@ -279,8 +279,33 @@ typedef struct
     double *peak_values;
 } test_table_t;
 
-void test_setup_free(test_setup_t *test_setup);
-esp_err_t test_init();
+
+int test_get_tara_enable();
+void test_print_elapsed_time();
+
+/*
+██████╗ ██╗   ██╗███╗   ██╗ █████╗ ███╗   ███╗██╗ ██████╗    ███╗   ███╗███████╗███╗   ███╗
+██╔══██╗╚██╗ ██╔╝████╗  ██║██╔══██╗████╗ ████║██║██╔════╝    ████╗ ████║██╔════╝████╗ ████║
+██║  ██║ ╚████╔╝ ██╔██╗ ██║███████║██╔████╔██║██║██║         ██╔████╔██║█████╗  ██╔████╔██║
+██║  ██║  ╚██╔╝  ██║╚██╗██║██╔══██║██║╚██╔╝██║██║██║         ██║╚██╔╝██║██╔══╝  ██║╚██╔╝██║
+██████╔╝   ██║   ██║ ╚████║██║  ██║██║ ╚═╝ ██║██║╚██████╗    ██║ ╚═╝ ██║███████╗██║ ╚═╝ ██║
+╚═════╝    ╚═╝   ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝ ╚═════╝    ╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝
+
+*/
+
+void free_test_setup(test_setup_t *test_setup);
+void free_test_table(test_table_t *test_table);
+
+/*
+███████╗███████╗████████╗██╗   ██╗██████╗
+██╔════╝██╔════╝╚══██╔══╝██║   ██║██╔══██╗
+███████╗█████╗     ██║   ██║   ██║██████╔╝
+╚════██║██╔══╝     ██║   ██║   ██║██╔═══╝
+███████║███████╗   ██║   ╚██████╔╝██║
+╚══════╝╚══════╝   ╚═╝    ╚═════╝ ╚═╝
+
+*/
+
 esp_err_t test_set_type(test_type_t *type);
 esp_err_t test_set_inputs(test_inputs_t *inputs);
 esp_err_t test_set_logging(test_logging_t *logging);
@@ -288,7 +313,6 @@ esp_err_t test_set_stop(test_stop_t *stop);
 esp_err_t test_set_motor(test_motor_t *motor);
 esp_err_t test_set_graph(test_graph_t *graph);
 esp_err_t test_set_start(test_start_t *start);
-esp_err_t test_move_setup(test_setup_t **test_setup);
 
 void test_print_type(void);
 void test_print_inputs(void);
@@ -302,7 +326,7 @@ esp_err_t test_input_get_sensor_num_from_enablers(int *sensor_num, uint8_t enabl
 esp_err_t test_get_sensor_index_from_combobox(int combobox_val, uint8_t *sensor_index);
 esp_err_t test_get_logging_direction_from_combobox(int combobox_val, logging_direction_t *direction);
 esp_err_t test_get_graph_option_from_combobox(int combobox_val, axis_option_t *axis_option);
-esp_err_t test_get_start_first_point_from_multiradio(int multiradio_val, first_point_taken_at_t *first_point);
+esp_err_t test_get_start_first_point_from_multiradio(int multiradio_val, first_point_t *first_point);
 esp_err_t test_start_GreaterThan_set_sensor_index(int sensor_index);
 esp_err_t test_start_GreaterThan_get_sensor_index(int *sensor_index);
 esp_err_t test_start_LessThan_set_sensor_index(int sensor_index);
@@ -316,3 +340,106 @@ esp_err_t test_set_start_page(page_t page);
 esp_err_t test_get_logging_page(page_t *page);
 esp_err_t test_get_stop_page(page_t *page);
 esp_err_t test_get_start_page(page_t *page);
+
+/*
+████████╗ █████╗ ██████╗ ██╗     ███████╗
+╚══██╔══╝██╔══██╗██╔══██╗██║     ██╔════╝
+   ██║   ███████║██████╔╝██║     █████╗
+   ██║   ██╔══██║██╔══██╗██║     ██╔══╝
+   ██║   ██║  ██║██████╔╝███████╗███████╗
+   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
+
+*/
+esp_err_t test_table_add_row(int slot);
+/*
+██████╗ ██╗      ██████╗ ████████╗████████╗██╗███╗   ██╗ ██████╗
+██╔══██╗██║     ██╔═══██╗╚══██╔══╝╚══██╔══╝██║████╗  ██║██╔════╝
+██████╔╝██║     ██║   ██║   ██║      ██║   ██║██╔██╗ ██║██║  ███╗
+██╔═══╝ ██║     ██║   ██║   ██║      ██║   ██║██║╚██╗██║██║   ██║
+██║     ███████╗╚██████╔╝   ██║      ██║   ██║██║ ╚████║╚██████╔╝
+╚═╝     ╚══════╝ ╚═════╝    ╚═╝      ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝
+
+*/
+void current_test_plot_status(int slot);
+void current_test_plot_last_data_p1(void);
+void current_test_plot_last_data_p2_p3(int slot);
+void current_test_load_foreground_slot(void);
+void current_test_reset_default_p1_p2_p3();
+
+/*
+███████╗████████╗ █████╗ ██████╗ ████████╗     ██████╗ ██████╗ ███╗   ██╗██████╗ ██╗████████╗██╗ ██████╗ ███╗   ██╗
+██╔════╝╚══██╔══╝██╔══██╗██╔══██╗╚══██╔══╝    ██╔════╝██╔═══██╗████╗  ██║██╔══██╗██║╚══██╔══╝██║██╔═══██╗████╗  ██║
+███████╗   ██║   ███████║██████╔╝   ██║       ██║     ██║   ██║██╔██╗ ██║██║  ██║██║   ██║   ██║██║   ██║██╔██╗ ██║
+╚════██║   ██║   ██╔══██║██╔══██╗   ██║       ██║     ██║   ██║██║╚██╗██║██║  ██║██║   ██║   ██║██║   ██║██║╚██╗██║
+███████║   ██║   ██║  ██║██║  ██║   ██║       ╚██████╗╚██████╔╝██║ ╚████║██████╔╝██║   ██║   ██║╚██████╔╝██║ ╚████║
+╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+
+*/
+esp_err_t test_start_condition_trigger_immediately(int slot);
+esp_err_t test_start_condition_time_delay(int slot);
+esp_err_t test_start_condition_greater_than(int slot);
+esp_err_t test_start_condition_less_than(int slot);
+
+/*
+███████╗████████╗ ██████╗ ██████╗      ██████╗ ██████╗ ███╗   ██╗██████╗ ██╗████████╗██╗ ██████╗ ███╗   ██╗
+██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗    ██╔════╝██╔═══██╗████╗  ██║██╔══██╗██║╚══██╔══╝██║██╔═══██╗████╗  ██║
+███████╗   ██║   ██║   ██║██████╔╝    ██║     ██║   ██║██╔██╗ ██║██║  ██║██║   ██║   ██║██║   ██║██╔██╗ ██║
+╚════██║   ██║   ██║   ██║██╔═══╝     ██║     ██║   ██║██║╚██╗██║██║  ██║██║   ██║   ██║██║   ██║██║╚██╗██║
+███████║   ██║   ╚██████╔╝██║         ╚██████╗╚██████╔╝██║ ╚████║██████╔╝██║   ██║   ██║╚██████╔╝██║ ╚████║
+╚══════╝   ╚═╝    ╚═════╝ ╚═╝          ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+
+*/
+esp_err_t test_stop_condition_greater_than(int slot);
+esp_err_t test_stop_condition_less_than(int slot);
+esp_err_t test_stop_condition_time_delay(int slot);
+esp_err_t test_stop_condition_distance_up(int slot);
+esp_err_t test_stop_condition_distance_down(int slot);
+esp_err_t test_stop_condition_percent_drop(int slot);
+esp_err_t test_stop_condition_percent_strain(int slot);
+esp_err_t test_stop_condition_percent_stress_drop(int slot);
+esp_err_t test_stop_condition_operator_stop(int slot);
+
+/*
+██╗      ██████╗  ██████╗  ██████╗ ██╗███╗   ██╗ ██████╗      ██████╗ ██████╗ ███╗   ██╗██████╗ ██╗████████╗██╗ ██████╗ ███╗   ██╗
+██║     ██╔═══██╗██╔════╝ ██╔════╝ ██║████╗  ██║██╔════╝     ██╔════╝██╔═══██╗████╗  ██║██╔══██╗██║╚══██╔══╝██║██╔═══██╗████╗  ██║
+██║     ██║   ██║██║  ███╗██║  ███╗██║██╔██╗ ██║██║  ███╗    ██║     ██║   ██║██╔██╗ ██║██║  ██║██║   ██║   ██║██║   ██║██╔██╗ ██║
+██║     ██║   ██║██║   ██║██║   ██║██║██║╚██╗██║██║   ██║    ██║     ██║   ██║██║╚██╗██║██║  ██║██║   ██║   ██║██║   ██║██║╚██╗██║
+███████╗╚██████╔╝╚██████╔╝╚██████╔╝██║██║ ╚████║╚██████╔╝    ╚██████╗╚██████╔╝██║ ╚████║██████╔╝██║   ██║   ██║╚██████╔╝██║ ╚████║
+╚══════╝ ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝╚═╝  ╚═══╝ ╚═════╝      ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
+
+*/
+esp_err_t test_logging_condition_interval_logging(int slot);
+esp_err_t test_logging_condition_linear_time_interval(int slot);
+esp_err_t test_logging_condition_interval_logging_table(int slot);
+esp_err_t test_logging_condition_elapsed_time_table(int slot);
+
+/*
+███████╗████████╗ ██████╗ ██████╗  █████╗  ██████╗ ███████╗
+██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔══██╗██╔════╝ ██╔════╝
+███████╗   ██║   ██║   ██║██████╔╝███████║██║  ███╗█████╗
+╚════██║   ██║   ██║   ██║██╔══██╗██╔══██║██║   ██║██╔══╝
+███████║   ██║   ╚██████╔╝██║  ██║██║  ██║╚██████╔╝███████╗
+╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+
+*/
+void test_init_storage(void);
+void test_save_on_external_usb(int slot);
+void test_save_on_internal_filesystem(int slot);
+
+/*
+███████╗██╗      ██████╗ ████████╗
+██╔════╝██║     ██╔═══██╗╚══██╔══╝
+███████╗██║     ██║   ██║   ██║
+╚════██║██║     ██║   ██║   ██║
+███████║███████╗╚██████╔╝   ██║
+╚══════╝╚══════╝ ╚═════╝    ╚═╝
+
+*/
+esp_err_t test_is_an_slot_in_execution();
+esp_err_t test_get_available_slot(int *slot);
+void test_deinit_all_slot_initialized();
+void test_deinit_slot_configured(int slot);
+esp_err_t test_init_available_slot();
+void test_complete_initialized_slot(void);
+void test_run_slot(int slot);
+void test_run_all(void);

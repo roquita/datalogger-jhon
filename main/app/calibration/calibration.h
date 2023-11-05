@@ -60,19 +60,20 @@ typedef struct
     int num_decimals;
 } sensor_calib_t;
 
-#define SENSOR_CALIB_DEFAULT                      \
-    (sensor_calib_t)                              \
-    {                                             \
-        .sensor_type = SENSOR_TYPE_MAX,           \
-        .capacity = 0.0,                          \
-        .unit_src = SENSOR_UNIT_MAX,              \
-        .sensibility_val = 0.0,                   \
-        .sensibility_unit = SENSIBILITY_UNIT_MAX, \
-        .limit_val = 0.0,                         \
-        .limit_enabled = false,                   \
-        .num_points = NUM_POINTS_CUSTOM,          \
-        .name_len = 0,                            \
-        .num_decimals = 0,                        \
+#define SENSOR_CALIB_DEFAULT                             \
+    (sensor_calib_t)                                     \
+    {                                                    \
+        .sensor_type = SENSOR_TYPE_MAX,                  \
+        .capacity = 0.0,                                 \
+        .unit_src = SENSOR_UNIT_MAX,                     \
+        .sensibility_val = 0.0,                          \
+        .sensibility_unit = SENSIBILITY_UNIT_MAX,        \
+        .limit_val = 0.0,                                \
+        .limit_enabled = false,                          \
+        .num_points = NUM_POINTS_CUSTOM,                 \
+        .name_len = strlen(NEXTION_DEFAULT_SENSOR_NAME), \
+        .num_decimals = 0,                               \
+        .name = NEXTION_DEFAULT_SENSOR_NAME,             \
     }
 
 typedef char(row_t)[TABLE_NUM_COLS][15];

@@ -121,6 +121,10 @@ void main_task(void *arg)
             tara_enabled_cb(&msg);
         else if (type == TARA_DISABLED)
             tara_disabled_cb(&msg);
+        else if (type == GOTO_NEW_TEST_FROM_HOME)
+            goto_new_test_from_home_cb(&msg);
+        else if (type == GOTO_CURRENT_TEST_FROM_HOME)
+            goto_current_test_from_home_cb(&msg);
 
         // CALIBRATION
         else if (type == SENSOR_DISABLED)
@@ -131,6 +135,10 @@ void main_task(void *arg)
             sensor_limits_disabled(&msg);
         else if (type == LIMITS_ENABLED)
             sensor_limits_enabled(&msg);
+
+        // DATETIME
+        else if (type == DATETIME_RTC_ALL_AT_ONCE_RECEIVED)
+            datetime_rtc_all_at_once_received_cb(&msg);
 
         // INPUT CALIBRATION
         else if (type > INPUT_CALIBRATION_MIN && type < INPUT_CALIBRATION_MAX)
@@ -243,8 +251,19 @@ void main_task(void *arg)
         else if (type == NEXTION_UPDATE)
             nextion_update_cb(&msg);
 
-        else if (type == TEST_TIMER)
-            test_timer_cb(&msg);
+        // MAIN TIMER
+        else if (type == PERIODIC_100MS)
+            periodic_100ms_cb(&msg);
+        else if (type == PERIODIC_1S)
+            periodic_1s_cb(&msg);
+
+        // TIME_TIMER
+        else if (type == TIME_RTC_START_SYNC)
+            time_rtc_start_sync_cb(&msg);
+        else if (type == TIME_RTC_DATA_RECEIVED)
+            time_rtc_data_received_cb(&msg);
+        else if (type == TIME_DATETIME_PRINT)
+            time_datetime_print_cb(&msg);
 
         else
         {

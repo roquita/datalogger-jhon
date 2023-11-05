@@ -1,6 +1,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
+#include "freertos/timers.h"
 #include "esp_log.h"
 #include "string.h"
 #include "project_defines.h"
@@ -13,8 +14,22 @@
 #include "esp_err.h"
 #include "helpers.h"
 #include "test.h"
+#include "time_esp32s2.h"
 
 #define TAG "MAIN_CALLBACK"
+
+TimerHandle_t main_timer = NULL;
+
+int counter = 0;
+static void main_timer_callback(TimerHandle_t xTimer)
+{
+    SEND_EMPTY_MSG(main_queue, PERIODIC_100MS, portMAX_DELAY);
+
+    if ((counter % 10) == 0)
+        SEND_EMPTY_MSG(main_queue, PERIODIC_1S, portMAX_DELAY);
+
+    counter++;
+}
 
 /*
 ██╗███╗   ██╗██╗████████╗
@@ -28,11 +43,44 @@
 
 void main_task_init()
 {
-    // init gui
-    nextion_1_init();
+    main_timer = xTimerCreate("main timer", pdMS_TO_TICKS(100), pdTRUE, NULL, main_timer_callback);
+    
+
+    // SYNC TIME
     vTaskDelay(pdMS_TO_TICKS(3000));
 
-    // init sensors default
+    // NEXTION IN
+    nextion_1_init_hardware();
+    nextion_1_init_timer();
+
+    /************************** INTRO LOADING  **************************/
+    nextion_1_intro_write_loading(10);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    /********************************************************************/
+
+    // TIME
+    time_init_timer();
+    time_rtc_start_sync();
+
+    /************************** INTRO LOADING  **************************/
+    nextion_1_intro_write_loading(20);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    /********************************************************************/
+
+    /************************** INTRO LOADING  **************************/
+    nextion_1_intro_write_loading(60);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    /********************************************************************/
+
+    // TEST ( use fatfs and usb )
+    test_init_storage();
+
+    /************************** INTRO LOADING  **************************/
+    nextion_1_intro_write_loading(80);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    /********************************************************************/
+
+    // CALIBRATION (use nvs)
     for (int index = 0; index < NUM_SENSORS; index++)
         sensor_init(index);
 
@@ -57,8 +105,6 @@ void main_task_init()
         bool load_calib_success = (inputCalib_load(index, &calib) == ESP_OK);
         bool load_config_success = (config_sensor_load(index, &config) == ESP_OK);
 
-        bool load_success = load_calib_success && load_config_success;
-
         // update ram
         if (load_calib_success)
             sensor_set_calibration(index, &calib);
@@ -71,21 +117,29 @@ void main_task_init()
             ESP_LOGW(TAG, "file:%s, line:%d", __FILE__, __LINE__);
 
         // update objects on screen
-        nextion_1_home_write_name(index, load_success ? sensor_get_name(index) : NEXTION_DEFAULT_SENSOR_NAME);
-        nextion_1_home_write_unit(index, load_success ? sensor_get_unit_str(index) : NEXTION_DEFAULT_SENSOR_UNIT);
-        nextion_1_home_write_unitps(index, load_success ? sensor_get_unitps_str(index) : NEXTION_DEFAULT_SENSOR_UNITPS);
-        nextion_1_calibration_write_name(index, load_success ? sensor_get_name(index) : NEXTION_DEFAULT_SENSOR_NAME);
-        nextion_1_calibration_write_range(index, load_success ? sensor_get_range(index) : NEXTION_DEFAULT_RANGE);
-        nextion_1_calibration_write_units_path(index, load_success ? sensor_get_units_path(index) : NEXTION_DEFAULT_PATH);
-        nextion_1_calibration_write_units_val(index, load_success ? sensor_get_units_val(index) : NEXTION_DEFAULT_UNITS_VAL);
-        nextion_1_calibration_write_unit(index, load_success ? sensor_get_unit_str(index) : NEXTION_DEFAULT_SENSOR_UNIT);
-        nextion_1_calibration_write_limit(index, load_success ? sensor_is_limit_enabled(index) : NEXTION_DEFAULT_LIMIT_ENABLED);
-        bool is_enabled = load_success ? sensor_is_enabled(index) : NEXTION_DEFAULT_SENSOR_ENABLE;
+        nextion_1_home_write_name(index, sensor_get_name(index));
+        nextion_1_home_write_unit(index, sensor_get_unit_str(index));
+        nextion_1_home_write_unitps(index, sensor_get_unitps_str(index));
+        nextion_1_calibration_write_name(index, sensor_get_name(index));
+        nextion_1_calibration_write_range(index, sensor_get_range(index));
+        nextion_1_calibration_write_units_path(index, sensor_get_units_path(index));
+        nextion_1_calibration_write_units_val(index, sensor_get_units_val(index));
+        nextion_1_calibration_write_unit(index, sensor_get_unit_str(index));
+        nextion_1_calibration_write_limit(index, sensor_is_limit_enabled(index));
+        bool is_enabled = sensor_is_enabled(index);
         nextion_1_calibration_write_switch(index, is_enabled);
         SEND_I32_MSG(sensor_queue, is_enabled ? SENSOR_ENABLED : SENSOR_DISABLED, index, portMAX_DELAY);
     }
 
-    nextion_1_start_timer();
+    /************************** INTRO LOADING  **************************/
+    nextion_1_intro_write_loading(100);
+    vTaskDelay(pdMS_TO_TICKS(100));
+    /********************************************************************/
+
+    // NEXTION OUT
+    nextion_1_goto_page(NEXTION_POST_INIT_PAGE);
+
+    xTimerStart(main_timer, portMAX_DELAY);
 }
 
 /*
@@ -167,28 +221,28 @@ void new_test_p3_1_loaded_cb(msg_t *msg)
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_1);
     nextion_1_stop_timer();
-    new_test_set_logging_page(PAGE_NEW_TEST_P3_1);
+    test_set_logging_page(PAGE_NEW_TEST_P3_1);
 }
 void new_test_p3_2_loadedcb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_2);
     nextion_1_stop_timer();
-    new_test_set_logging_page(PAGE_NEW_TEST_P3_2);
+    test_set_logging_page(PAGE_NEW_TEST_P3_2);
 }
 void new_test_p3_3_loadedcb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_3);
     nextion_1_stop_timer();
-    new_test_set_logging_page(PAGE_NEW_TEST_P3_3);
+    test_set_logging_page(PAGE_NEW_TEST_P3_3);
 }
 void new_test_p3_4_loadedcb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_4);
     nextion_1_stop_timer();
-    new_test_set_logging_page(PAGE_NEW_TEST_P3_4);
+    test_set_logging_page(PAGE_NEW_TEST_P3_4);
 }
 void log_sensor_table_loaded_cb(msg_t *msg)
 {
@@ -207,63 +261,63 @@ void new_test_p4_1_loaded_cb(msg_t *msg)
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_1);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_1);
+    test_set_stop_page(PAGE_NEW_TEST_P4_1);
 }
 void new_test_p4_2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_2);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_2);
+    test_set_stop_page(PAGE_NEW_TEST_P4_2);
 }
 void new_test_p4_3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_3);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_3);
+    test_set_stop_page(PAGE_NEW_TEST_P4_3);
 }
 void new_test_p4_4_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_4);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_4);
+    test_set_stop_page(PAGE_NEW_TEST_P4_4);
 }
 void new_test_p4_5_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_5);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_5);
+    test_set_stop_page(PAGE_NEW_TEST_P4_5);
 }
 void new_test_p4_6_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_6);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_6);
+    test_set_stop_page(PAGE_NEW_TEST_P4_6);
 }
 void new_test_p4_7_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_7);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_7);
+    test_set_stop_page(PAGE_NEW_TEST_P4_7);
 }
 void new_test_p4_8_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_8);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_8);
+    test_set_stop_page(PAGE_NEW_TEST_P4_8);
 }
 void new_test_p4_9_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_9);
     nextion_1_stop_timer();
-    new_test_set_stop_page(PAGE_NEW_TEST_P4_9);
+    test_set_stop_page(PAGE_NEW_TEST_P4_9);
 }
 void new_test_p5_loaded_cb(msg_t *msg)
 {
@@ -282,28 +336,28 @@ void new_test_p7_1_loaded_cb(msg_t *msg)
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_1);
     nextion_1_stop_timer();
-    new_test_set_start_page(PAGE_NEW_TEST_P7_1);
+    test_set_start_page(PAGE_NEW_TEST_P7_1);
 }
 void new_test_p7_2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_2);
     nextion_1_stop_timer();
-    new_test_set_start_page(PAGE_NEW_TEST_P7_2);
+    test_set_start_page(PAGE_NEW_TEST_P7_2);
 }
 void new_test_p7_3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_3);
     nextion_1_start_timer();
-    new_test_set_start_page(PAGE_NEW_TEST_P7_3);
+    test_set_start_page(PAGE_NEW_TEST_P7_3);
 }
 void new_test_p7_4_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_4);
     nextion_1_start_timer();
-    new_test_set_start_page(PAGE_NEW_TEST_P7_4);
+    test_set_start_page(PAGE_NEW_TEST_P7_4);
 }
 void previous_test_p1_loaded_cb(msg_t *msg)
 {
@@ -345,7 +399,7 @@ void current_test_p1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_CURRENT_TEST_P1);
-    nextion_1_stop_timer();
+    nextion_1_start_timer();
 }
 void current_test_p2_loaded_cb(msg_t *msg)
 {
@@ -357,7 +411,7 @@ void current_test_p3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_CURRENT_TEST_P3);
-    nextion_1_start_timer();
+    nextion_1_stop_timer();
 }
 
 /*
@@ -406,6 +460,40 @@ void tara_disabled_cb(msg_t *msg)
 
     // update nvs
     config_sensor_save(index, sensor_get_configuration(index));
+}
+void goto_new_test_from_home_cb(msg_t *msg)
+{
+    int slot;
+    bool is_full = test_get_available_slot(&slot) != ESP_OK;
+    if (is_full)
+    {
+        ESP_LOGW(TAG, "%s: line %d", __FILE__, __LINE__);
+        nextion_1_message_write_content("\r\nERROR:\r\nTOO MUCH TEST RUNNING");
+        nextion_1_message_write_nextpage(PAGE_HOME);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+    }
+    else
+    {
+        nextion_1_goto_page(PAGE_NEW_TEST_P1);
+    }
+}
+void goto_current_test_from_home_cb(msg_t *msg)
+{
+    int slot;
+    bool no_slot_in_execution = test_is_an_slot_in_execution() != ESP_OK;
+    if (no_slot_in_execution)
+    {
+        ESP_LOGW(TAG, "%s: line %d", __FILE__, __LINE__);
+        nextion_1_message_write_content("\r\nERROR:\r\nNO TEST IN EXECUTION");
+        nextion_1_message_write_nextpage(PAGE_HOME);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+    }
+    else
+    {
+        nextion_1_goto_page(PAGE_CURRENT_TEST_P1);
+    }
 }
 
 /*
@@ -499,6 +587,50 @@ void sensor_limits_enabled(msg_t *msg)
 
     // set on nvs
     config_sensor_save(index, sensor_get_configuration(index));
+}
+
+/*
+██████╗  █████╗ ████████╗███████╗████████╗██╗███╗   ███╗███████╗
+██╔══██╗██╔══██╗╚══██╔══╝██╔════╝╚══██╔══╝██║████╗ ████║██╔════╝
+██║  ██║███████║   ██║   █████╗     ██║   ██║██╔████╔██║█████╗
+██║  ██║██╔══██║   ██║   ██╔══╝     ██║   ██║██║╚██╔╝██║██╔══╝
+██████╔╝██║  ██║   ██║   ███████╗   ██║   ██║██║ ╚═╝ ██║███████╗
+╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝
+
+*/
+// DATETIME
+void datetime_rtc_all_at_once_received_cb(msg_t *msg)
+{
+    // VERIFY PAYLOAD LENGTH
+    int size_received = msg->size;
+    bool size_ok = (size_received == 9);
+    if (!size_ok)
+    {
+        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
+        nextion_1_message_write_nextpage(PAGE_DATETIME);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+        goto end;
+    }
+
+    // UNPACK
+    uint8_t *addr = msg->content.addr;
+    struct tm datetime;
+    datetime.tm_year = *(uint16_t *)addr;
+    datetime.tm_mon = *(addr + 2);
+    datetime.tm_mday = *(addr + 3);
+    datetime.tm_hour = *(addr + 4);
+    datetime.tm_min = *(addr + 5);
+    datetime.tm_sec = *(addr + 6);
+    timeformat_t timeformat = (*(addr + 7) == 2) ? TIMEFORMAT_24H : TIMEFORMAT_AM_PM;
+    dateformat_t dateformat = (*(addr + 8) == 0) ? DATEFORMAT_MM_DD_YYYY : DATEFORMAT_DD_MM_YYYY;
+
+    time_set_rtc_data_atOnce(&datetime, dateformat, timeformat);
+
+end:
+    if (size_received > 0)
+        free(msg->content.addr);
 }
 
 /*
@@ -914,7 +1046,7 @@ void new_test_p1_type_received(msg_t *msg)
     // UNPACK
     uint8_t *addr = msg->content.addr;
     test_type_t test_type;
-    esp_err_t err = new_test_get_type_from_multiradio(*addr, &test_type);
+    esp_err_t err = test_get_type_from_multiradio(*addr, &test_type);
 
     // VERIFY UNPACK ERR
     if (err != ESP_OK)
@@ -923,35 +1055,35 @@ void new_test_p1_type_received(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR: INVALID TYPE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // STORE DATA
-    err = new_test_init();
+    err = test_init_available_slot();
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\n LOW MEMORY");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
-    err = new_test_set_type(&test_type);
+    err = test_set_type(&test_type);
     if (err != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\n INTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P2);
+    nextion_1_goto_page(PAGE_NEW_TEST_P2);
 
 end:
     if (size_received > 0)
@@ -978,7 +1110,7 @@ void new_test_p2_inputs_received(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n COMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -987,7 +1119,7 @@ void new_test_p2_inputs_received(msg_t *msg)
     uint8_t input_enable = *addr;
     uint8_t tara_enable = *(addr + 1);
     int sensor_num;
-    new_test_input_get_sensor_num_from_enablers(&sensor_num, input_enable);
+    test_input_get_sensor_num_from_enablers(&sensor_num, input_enable);
 
     // VERIFY UNPACK ERR
     if (input_enable == 0)
@@ -996,7 +1128,7 @@ void new_test_p2_inputs_received(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n NO INPUTS SELECTED");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1006,21 +1138,21 @@ void new_test_p2_inputs_received(msg_t *msg)
     test_inputs.tara_enable.byte = tara_enable;
     test_inputs.sensor_num = sensor_num;
 
-    esp_err_t err3 = new_test_set_inputs(&test_inputs);
+    esp_err_t err3 = test_set_inputs(&test_inputs);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\n INTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
     page_t page;
-    new_test_get_logging_page(&page);
-    nextion_1_change_page(page);
+    test_get_logging_page(&page);
+    nextion_1_goto_page(page);
 
 end:
     if (size_received > 0)
@@ -1046,7 +1178,7 @@ void new_test_p3_1_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n COMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1055,8 +1187,8 @@ void new_test_p3_1_logging_received_cb(msg_t *msg)
     uint8_t sensor_index;
     logging_direction_t direction;
     double value = atof((char *)addr + 2);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*(addr), &sensor_index);
-    esp_err_t err2 = new_test_get_logging_direction_from_combobox(*(addr + 1), &direction);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*(addr), &sensor_index);
+    esp_err_t err2 = test_get_logging_direction_from_combobox(*(addr + 1), &direction);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1065,7 +1197,7 @@ void new_test_p3_1_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n LOGGING INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     // VERIFY UNPACK ERR
@@ -1075,7 +1207,7 @@ void new_test_p3_1_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n LOGGING DIRECTION");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     // VERIFY UNPACK ERR
@@ -1085,7 +1217,7 @@ void new_test_p3_1_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n LOGGING VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1096,21 +1228,21 @@ void new_test_p3_1_logging_received_cb(msg_t *msg)
     test_logging.parameters.interval_logging.direction = direction;
     test_logging.parameters.interval_logging.value = value;
 
-    esp_err_t err3 = new_test_set_logging(&test_logging);
+    esp_err_t err3 = test_set_logging(&test_logging);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
     page_t page;
-    new_test_get_stop_page(&page);
-    nextion_1_change_page(page);
+    test_get_stop_page(&page);
+    nextion_1_goto_page(page);
 
 end:
     if (size_received > 0)
@@ -1127,7 +1259,7 @@ void new_test_p3_2_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1142,7 +1274,7 @@ void new_test_p3_2_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n LOGGING VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1151,21 +1283,21 @@ void new_test_p3_2_logging_received_cb(msg_t *msg)
     test_logging.condition = LOGGING_CONDITION_LINEAR_TIME_INTERVAL;
     test_logging.parameters.linear_time_interval.value = (uint32_t)value;
 
-    esp_err_t err3 = new_test_set_logging(&test_logging);
+    esp_err_t err3 = test_set_logging(&test_logging);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\n INTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
     page_t page;
-    new_test_get_stop_page(&page);
-    nextion_1_change_page(page);
+    test_get_stop_page(&page);
+    nextion_1_goto_page(page);
 
 end:
     if (size_received > 0)
@@ -1182,7 +1314,7 @@ void new_test_p3_3_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n COMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1202,8 +1334,8 @@ void new_test_p3_3_logging_received_cb(msg_t *msg)
             break;
         }
     }
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*(addr), &sensor_index);
-    esp_err_t err2 = new_test_get_logging_direction_from_combobox(*(addr + 1), &direction);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*(addr), &sensor_index);
+    esp_err_t err2 = test_get_logging_direction_from_combobox(*(addr + 1), &direction);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1212,7 +1344,7 @@ void new_test_p3_3_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n LOGGING INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (err2 != ESP_OK)
@@ -1221,7 +1353,7 @@ void new_test_p3_3_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n LOGGING DIRECTION");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1233,21 +1365,21 @@ void new_test_p3_3_logging_received_cb(msg_t *msg)
     memcpy(test_logging.parameters.interval_logging_table.value, value, sizeof(value));
     test_logging.parameters.interval_logging_table.size = size;
 
-    esp_err_t err3 = new_test_set_logging(&test_logging);
+    esp_err_t err3 = test_set_logging(&test_logging);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
     page_t page;
-    new_test_get_stop_page(&page);
-    nextion_1_change_page(page);
+    test_get_stop_page(&page);
+    nextion_1_goto_page(page);
 
 end:
     if (size_received > 0)
@@ -1265,7 +1397,7 @@ void new_test_p3_4_logging_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P3_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1294,21 +1426,21 @@ void new_test_p3_4_logging_received_cb(msg_t *msg)
     memcpy(test_logging.parameters.elapsed_time_table.value, value, sizeof(value));
     test_logging.parameters.elapsed_time_table.size = size;
 
-    esp_err_t err3 = new_test_set_logging(&test_logging);
+    esp_err_t err3 = test_set_logging(&test_logging);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
     page_t page;
-    new_test_get_stop_page(&page);
-    nextion_1_change_page(page);
+    test_get_stop_page(&page);
+    nextion_1_goto_page(page);
 
 end:
     if (size_received > 0)
@@ -1334,7 +1466,7 @@ void new_test_p4_1_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1342,7 +1474,7 @@ void new_test_p4_1_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1351,7 +1483,7 @@ void new_test_p4_1_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1360,7 +1492,7 @@ void new_test_p4_1_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1370,19 +1502,19 @@ void new_test_p4_1_stop_received_cb(msg_t *msg)
     test_stop.parameters.greater_than.sensor_index = sensor_index;
     test_stop.parameters.greater_than.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1399,7 +1531,7 @@ void new_test_p4_2_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1407,7 +1539,7 @@ void new_test_p4_2_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1416,7 +1548,7 @@ void new_test_p4_2_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1425,7 +1557,7 @@ void new_test_p4_2_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1435,19 +1567,19 @@ void new_test_p4_2_stop_received_cb(msg_t *msg)
     test_stop.parameters.less_than.sensor_index = sensor_index;
     test_stop.parameters.less_than.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1464,7 +1596,7 @@ void new_test_p4_3_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1479,7 +1611,7 @@ void new_test_p4_3_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1488,19 +1620,19 @@ void new_test_p4_3_stop_received_cb(msg_t *msg)
     test_stop.condition = STOP_CONDITION_TIME_DELAY;
     test_stop.parameters.time_delay.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1517,7 +1649,7 @@ void new_test_p4_4_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1525,7 +1657,7 @@ void new_test_p4_4_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1534,7 +1666,7 @@ void new_test_p4_4_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1543,7 +1675,7 @@ void new_test_p4_4_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1553,19 +1685,19 @@ void new_test_p4_4_stop_received_cb(msg_t *msg)
     test_stop.parameters.distance_up.sensor_index = sensor_index;
     test_stop.parameters.distance_up.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1582,7 +1714,7 @@ void new_test_p4_5_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_5);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1590,7 +1722,7 @@ void new_test_p4_5_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1599,7 +1731,7 @@ void new_test_p4_5_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_5);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1608,7 +1740,7 @@ void new_test_p4_5_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_5);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1618,19 +1750,19 @@ void new_test_p4_5_stop_received_cb(msg_t *msg)
     test_stop.parameters.distance_down.sensor_index = sensor_index;
     test_stop.parameters.distance_down.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1647,7 +1779,7 @@ void new_test_p4_6_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_6);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1655,7 +1787,7 @@ void new_test_p4_6_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1664,7 +1796,7 @@ void new_test_p4_6_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_6);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1673,7 +1805,7 @@ void new_test_p4_6_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_6);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1683,19 +1815,19 @@ void new_test_p4_6_stop_received_cb(msg_t *msg)
     test_stop.parameters.percent_drop.sensor_index = sensor_index;
     test_stop.parameters.percent_drop.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1712,7 +1844,7 @@ void new_test_p4_7_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_7);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1720,7 +1852,7 @@ void new_test_p4_7_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1729,7 +1861,7 @@ void new_test_p4_7_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_7);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1738,7 +1870,7 @@ void new_test_p4_7_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_7);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1748,19 +1880,19 @@ void new_test_p4_7_stop_received_cb(msg_t *msg)
     test_stop.parameters.percent_strain.sensor_index = sensor_index;
     test_stop.parameters.percent_strain.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1777,7 +1909,7 @@ void new_test_p4_8_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_8);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1785,7 +1917,7 @@ void new_test_p4_8_stop_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
     double value = atof((char *)addr + 1);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if (err1 != ESP_OK)
@@ -1794,7 +1926,7 @@ void new_test_p4_8_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_8);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if (value < 0.001)
@@ -1803,7 +1935,7 @@ void new_test_p4_8_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n STOP VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_8);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1813,19 +1945,19 @@ void new_test_p4_8_stop_received_cb(msg_t *msg)
     test_stop.parameters.percent_stress_drop.sensor_index = sensor_index;
     test_stop.parameters.percent_stress_drop.value = value;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1842,7 +1974,7 @@ void new_test_p4_9_stop_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P4_9);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1850,19 +1982,19 @@ void new_test_p4_9_stop_received_cb(msg_t *msg)
     test_stop_t test_stop;
     test_stop.condition = STOP_CONDITION_OPERATOR_STOP;
 
-    esp_err_t err3 = new_test_set_stop(&test_stop);
+    esp_err_t err3 = test_set_stop(&test_stop);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_NEW_TEST_P5);
+    nextion_1_goto_page(PAGE_NEW_TEST_P5);
 
 end:
     if (size_received > 0)
@@ -1900,7 +2032,7 @@ void new_test_p6_graph_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P6);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1908,8 +2040,8 @@ void new_test_p6_graph_received_cb(msg_t *msg)
     uint8_t *addr = msg->content.addr;
     axis_option_t x_axis_option;
     axis_option_t y_axis_option;
-    esp_err_t err1 = new_test_get_graph_option_from_combobox(*addr, &x_axis_option);
-    esp_err_t err2 = new_test_get_graph_option_from_combobox(*(addr + 1), &y_axis_option);
+    esp_err_t err1 = test_get_graph_option_from_combobox(*addr, &x_axis_option);
+    esp_err_t err2 = test_get_graph_option_from_combobox(*(addr + 1), &y_axis_option);
 
     // VERIFY UNPACK ERR
     if ((err1 != ESP_OK))
@@ -1918,7 +2050,7 @@ void new_test_p6_graph_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n X - AXIS");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P6);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if ((err2 != ESP_OK))
@@ -1927,7 +2059,7 @@ void new_test_p6_graph_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n Y - AXIS");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P6);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1936,21 +2068,21 @@ void new_test_p6_graph_received_cb(msg_t *msg)
     test_graph.x_axis_option = x_axis_option;
     test_graph.y_axis_option = y_axis_option;
 
-    esp_err_t err3 = new_test_set_graph(&test_graph);
+    esp_err_t err3 = test_set_graph(&test_graph);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // GOTO NEXT PAGE
     page_t page;
-    new_test_get_start_page(&page);
-    nextion_1_change_page(page);
+    test_get_start_page(&page);
+    nextion_1_goto_page(page);
 
 end:
     if (size_received > 0)
@@ -1977,7 +2109,7 @@ void new_test_p7_1_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_1);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -1985,25 +2117,22 @@ void new_test_p7_1_start_received_cb(msg_t *msg)
     test_start_t test_start;
     test_start.condition = START_CONDITION_TRIGGER_IMMEDIATELY;
 
-    esp_err_t err3 = new_test_set_start(&test_start);
+    esp_err_t err3 = test_set_start(&test_start);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
-    // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_HOME);
+    // COMPLETE INITIALIZATION
+    test_complete_initialized_slot();
 
-    // RUN TEST
-    test_setup_t *test_setup;
-    new_test_move_setup(&test_setup);
-    current_test_delete_test();
-    current_test_add_new_test(test_setup);
+    // GOTO NEXT PAGE
+    nextion_1_goto_page(PAGE_CURRENT_TEST_P1);
 
 end:
     if (size_received > 0)
@@ -2020,7 +2149,7 @@ void new_test_p7_2_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -2035,7 +2164,7 @@ void new_test_p7_2_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n TRIGGER VALUE");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_2);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -2044,25 +2173,22 @@ void new_test_p7_2_start_received_cb(msg_t *msg)
     test_start.condition = START_CONDITION_TIME_DELAY;
     test_start.parameters.time_delay.value = value;
 
-    esp_err_t err3 = new_test_set_start(&test_start);
+    esp_err_t err3 = test_set_start(&test_start);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
-    // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_HOME);
+    // COMPLETE INITIALIZATION
+    test_complete_initialized_slot();
 
-    // RUN TEST
-    test_setup_t *test_setup;
-    new_test_move_setup(&test_setup);
-    current_test_delete_test();
-    current_test_add_new_test(test_setup);
+    // GOTO NEXT PAGE
+    nextion_1_goto_page(PAGE_CURRENT_TEST_P1);
 
 end:
     if (size_received > 0)
@@ -2079,18 +2205,18 @@ void new_test_p7_3_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // UNPACK
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
-    first_point_taken_at_t first_point_taken_at;
+    first_point_t first_point;
     double value = atof((char *)addr + 2);
     double current_value = atof((char *)addr + 13);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
-    esp_err_t err2 = new_test_get_start_first_point_from_multiradio(*(addr + 1), &first_point_taken_at);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err2 = test_get_start_first_point_from_multiradio(*(addr + 1), &first_point);
 
     // VERIFY UNPACK ERR
     if ((err1 != ESP_OK))
@@ -2099,7 +2225,7 @@ void new_test_p7_3_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n TRIGGER INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if ((err2 != ESP_OK))
@@ -2108,7 +2234,7 @@ void new_test_p7_3_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n FIRST POINT TAKEN AT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -2118,27 +2244,24 @@ void new_test_p7_3_start_received_cb(msg_t *msg)
     test_start.parameters.greater_than.sensor_index = sensor_index;
     test_start.parameters.greater_than.value = value;
     test_start.parameters.greater_than.current_value = current_value;
-    test_start.parameters.greater_than.first_point_taken_at = first_point_taken_at;
+    test_start.parameters.greater_than.first_point = first_point;
 
-    esp_err_t err3 = new_test_set_start(&test_start);
+    esp_err_t err3 = test_set_start(&test_start);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
-    // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_HOME);
+    // COMPLETE INITIALIZATION
+    test_complete_initialized_slot();
 
-    // RUN TEST
-    test_setup_t *test_setup;
-    new_test_move_setup(&test_setup);
-    current_test_delete_test();
-    current_test_add_new_test(test_setup);
+    // GOTO NEXT PAGE
+    nextion_1_goto_page(PAGE_CURRENT_TEST_P1);
 
 end:
     if (size_received > 0)
@@ -2155,14 +2278,14 @@ void new_test_p7_3_trigger_input_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // UNPACK
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
-    esp_err_t err = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if ((err != ESP_OK))
@@ -2171,19 +2294,19 @@ void new_test_p7_3_trigger_input_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n TRIGGER INPUT*");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_3);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // STORE DATA
-    err = new_test_start_GreaterThan_set_sensor_index(sensor_index);
+    err = test_start_GreaterThan_set_sensor_index(sensor_index);
     if ((err != ESP_OK))
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -2202,18 +2325,18 @@ void new_test_p7_4_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // UNPACK
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
-    first_point_taken_at_t first_point_taken_at;
+    first_point_t first_point;
     double value = atof((char *)addr + 2);
     double current_value = atof((char *)addr + 13);
-    esp_err_t err1 = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
-    esp_err_t err2 = new_test_get_start_first_point_from_multiradio(*(addr + 1), &first_point_taken_at);
+    esp_err_t err1 = test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err2 = test_get_start_first_point_from_multiradio(*(addr + 1), &first_point);
 
     // VERIFY UNPACK ERR
     if ((err1 != ESP_OK))
@@ -2222,7 +2345,7 @@ void new_test_p7_4_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n TRIGGER INPUT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
     if ((err2 != ESP_OK))
@@ -2231,7 +2354,7 @@ void new_test_p7_4_start_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n FIRST POINT TAKEN AT");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -2241,27 +2364,24 @@ void new_test_p7_4_start_received_cb(msg_t *msg)
     test_start.parameters.less_than.sensor_index = sensor_index;
     test_start.parameters.less_than.value = value;
     test_start.parameters.less_than.current_value = current_value;
-    test_start.parameters.less_than.first_point_taken_at = first_point_taken_at;
+    test_start.parameters.less_than.first_point = first_point;
 
-    esp_err_t err3 = new_test_set_start(&test_start);
+    esp_err_t err3 = test_set_start(&test_start);
     if (err3 != ESP_OK)
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
-    // GOTO NEXT PAGE
-    nextion_1_change_page(PAGE_HOME);
+    // COMPLETE INITIALIZATION
+    test_complete_initialized_slot();
 
-    // RUN TEST
-    test_setup_t *test_setup;
-    new_test_move_setup(&test_setup);
-    current_test_delete_test();
-    current_test_add_new_test(test_setup);
+    // GOTO NEXT PAGE
+    nextion_1_goto_page(PAGE_CURRENT_TEST_P1);
 
 end:
     if (size_received > 0)
@@ -2278,14 +2398,14 @@ void new_test_p7_4_trigger_input_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\nCOMUNICATION ERROR");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // UNPACK
     uint8_t *addr = msg->content.addr;
     uint8_t sensor_index;
-    esp_err_t err = new_test_get_sensor_index_from_combobox(*addr, &sensor_index);
+    esp_err_t err = test_get_sensor_index_from_combobox(*addr, &sensor_index);
 
     // VERIFY UNPACK ERR
     if ((err != ESP_OK))
@@ -2294,19 +2414,19 @@ void new_test_p7_4_trigger_input_received_cb(msg_t *msg)
         nextion_1_message_write_content("\r\nERROR:\r\n TRIGGER INPUT*");
         nextion_1_message_write_nextpage(PAGE_NEW_TEST_P7_4);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
     // STORE DATA
-    new_test_start_LessThan_set_sensor_index(sensor_index);
+    test_start_LessThan_set_sensor_index(sensor_index);
     if ((err != ESP_OK))
     {
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         nextion_1_message_write_content("\r\nERROR:\r\nINTERNAL ERROR");
         nextion_1_message_write_nextpage(PAGE_HOME);
         nextion_1_message_write_content_color(NEXTION_COLOR_RED);
-        nextion_1_change_page(PAGE_MESSAGE);
+        nextion_1_goto_page(PAGE_MESSAGE);
         goto end;
     }
 
@@ -2419,7 +2539,7 @@ void nextion_update_cb(msg_t *msg)
 
             if (is_ready)
             {
-                nextion_1_home_write_data(index, sensor_get_real_str(index));
+                nextion_1_home_write_data(index, sensor_get_real_str(index, true));
                 nextion_1_home_write_dataps(index, sensor_get_realps_str(index));
             }
         }
@@ -2433,7 +2553,7 @@ void nextion_update_cb(msg_t *msg)
 
             if (is_ready)
             {
-                nextion_1_calibration_write_value(index, sensor_get_real_str(index));
+                nextion_1_calibration_write_value(index, sensor_get_real_str(index, true));
             }
             if (is_enabled)
             {
@@ -2492,80 +2612,79 @@ void nextion_update_cb(msg_t *msg)
     else if (page == PAGE_NEW_TEST_P7_3)
     {
         int index;
-        new_test_start_GreaterThan_get_sensor_index(&index);
+        test_start_GreaterThan_get_sensor_index(&index);
         bool is_enabled = sensor_is_enabled(index);
         bool is_calibrated = sensor_is_calibrated(index);
         bool is_free = sensor_is_free(index);
 
-        char *content = (is_enabled && is_calibrated && is_free) ? sensor_get_real_str(index) : "";
+        char *content = (is_enabled && is_calibrated && is_free) ? sensor_get_real_str(index, (test_get_tara_enable() >> index) & 1) : "";
         nextion_1_new_test_p7_3_write_current_value(content);
     }
     else if (page == PAGE_NEW_TEST_P7_4)
     {
         int index;
-        new_test_start_LessThan_get_sensor_index(&index);
+        test_start_LessThan_get_sensor_index(&index);
         bool is_enabled = sensor_is_enabled(index);
         bool is_calibrated = sensor_is_calibrated(index);
         bool is_free = sensor_is_free(index);
 
-        char *content = (is_enabled && is_calibrated && is_free) ? sensor_get_real_str(index) : "";
+        char *content = (is_enabled && is_calibrated && is_free) ? sensor_get_real_str(index, (test_get_tara_enable() >> index) & 1) : "";
         nextion_1_new_test_p7_4_write_current_value(content);
     }
-    else if (page == PAGE_CURRENT_TEST_P3)
+    else if (page == PAGE_CURRENT_TEST_P1)
     {
+        current_test_plot_last_data_p1();
     }
     else
     {
-        ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
+        // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
     }
 }
 
 /*
- ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗    ████████╗██╗███╗   ███╗███████╗██████╗
-██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
-██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║          ██║   ██║██╔████╔██║█████╗  ██████╔╝
-██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║          ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
-╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║          ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
- ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝          ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+███╗   ███╗ █████╗ ██╗███╗   ██╗    ████████╗██╗███╗   ███╗███████╗██████╗
+████╗ ████║██╔══██╗██║████╗  ██║    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
+██╔████╔██║███████║██║██╔██╗ ██║       ██║   ██║██╔████╔██║█████╗  ██████╔╝
+██║╚██╔╝██║██╔══██║██║██║╚██╗██║       ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
+██║ ╚═╝ ██║██║  ██║██║██║ ╚████║       ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
+╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝       ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
 
 */
-void test_timer_cb(msg_t *msg)
+void periodic_100ms_cb(msg_t *msg)
 {
-    for (int i = 0; i < CURRENT_TEST_NUM_MAX; i++)
-    {
-        bool is_configured = current_test_is_test_configured(i);
-        if (!is_configured)
-            continue;
+    test_run_all();
+}
+void periodic_1s_cb(msg_t *msg)
+{
+    test_print_elapsed_time();
+}
 
-        bool is_started = current_test_is_start_condition_done(i);
-        if (!is_started)
-        {
-            // check start condition
-            test_start_t start;
-            switch (start.condition)
-            {
-            case START_CONDITION_TRIGGER_IMMEDIATELY:
-                start_condition_done[i] = true;
-                break;
-            case START_CONDITION_TIME_DELAY:
-                if (system_timestamp > setup_timestapm)
-                {
-                }
-            case START_CONDITION_GREATER_THAN:
-                int sensor_index = start.parameters.greater_than.sensor_index;
-                double value = start.parameters.greater_than.value;
-                double real = sensor_get_real(sensor_index);
-                if (real > value)
-                {
-                }
-            default:
-                break;
-            }
-        }
-        else
-        {
-            // check logging condition
-            // check stop condition
-        }
-    }
+/*
+████████╗██╗███╗   ███╗███████╗    ████████╗██╗███╗   ███╗███████╗██████╗
+╚══██╔══╝██║████╗ ████║██╔════╝    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
+   ██║   ██║██╔████╔██║█████╗         ██║   ██║██╔████╔██║█████╗  ██████╔╝
+   ██║   ██║██║╚██╔╝██║██╔══╝         ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
+   ██║   ██║██║ ╚═╝ ██║███████╗       ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
+   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝       ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+
+*/
+
+void time_rtc_start_sync_cb(msg_t *msg)
+{
+    nextion_1_datetime_get_rtc_year();
+    nextion_1_datetime_get_rtc_month();
+    nextion_1_datetime_get_rtc_day();
+    nextion_1_datetime_get_rtc_hour();
+    nextion_1_datetime_get_rtc_minute();
+    nextion_1_datetime_get_rtc_second();
+    nextion_1_datetime_get_rtc_dateformat();
+    nextion_1_datetime_get_rtc_timeformat();
+}
+void time_rtc_data_received_cb(msg_t *msg)
+{
+    time_set_rtc_data_1by1(msg->content.i32);
+}
+void time_datetime_print_cb(msg_t *msg)
+{
+    nextion_1_set_datetime(time_get_datetime_formated(false, 0));
 }

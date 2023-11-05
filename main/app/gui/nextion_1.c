@@ -20,7 +20,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 7,
         .home_Unitps = 9,
         .home_Tara = 4,
-        .home_Use = 5,
+        .home_Status = 5,
         .calibration_Switch = 4,
         .calibration_Name = 2,
         .calibration_Range = 3,
@@ -34,7 +34,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 37,
         .currenttestp1_Unit = 36,
         .currenttestp1_Unitps = 38,
-        .currenttestp2_Unit = 41,
+        .currenttestp2_Name = 12,
+        .currenttestp2_Unit = 38,
         .currenttestp2_Data = 22,
     },
     {
@@ -44,7 +45,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 14,
         .home_Unitps = 16,
         .home_Tara = 11,
-        .home_Use = 12,
+        .home_Status = 12,
         .calibration_Switch = 16,
         .calibration_Name = 14,
         .calibration_Range = 15,
@@ -58,7 +59,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 42,
         .currenttestp1_Unit = 41,
         .currenttestp1_Unitps = 43,
-        .currenttestp2_Unit = 42,
+        .currenttestp2_Name = 13,
+        .currenttestp2_Unit = 39,
         .currenttestp2_Data = 23,
     },
     {
@@ -68,7 +70,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 21,
         .home_Unitps = 23,
         .home_Tara = 18,
-        .home_Use = 19,
+        .home_Status = 19,
         .calibration_Switch = 22,
         .calibration_Name = 20,
         .calibration_Range = 21,
@@ -82,7 +84,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 47,
         .currenttestp1_Unit = 46,
         .currenttestp1_Unitps = 48,
-        .currenttestp2_Unit = 43,
+        .currenttestp2_Name = 14,
+        .currenttestp2_Unit = 40,
         .currenttestp2_Data = 24,
     },
     {
@@ -92,7 +95,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 28,
         .home_Unitps = 30,
         .home_Tara = 25,
-        .home_Use = 26,
+        .home_Status = 26,
         .calibration_Switch = 28,
         .calibration_Name = 26,
         .calibration_Range = 27,
@@ -106,7 +109,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 52,
         .currenttestp1_Unit = 51,
         .currenttestp1_Unitps = 53,
-        .currenttestp2_Unit = 44,
+        .currenttestp2_Name = 15,
+        .currenttestp2_Unit = 41,
         .currenttestp2_Data = 25,
     },
     {
@@ -116,7 +120,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 35,
         .home_Unitps = 37,
         .home_Tara = 32,
-        .home_Use = 33,
+        .home_Status = 33,
         .calibration_Switch = 34,
         .calibration_Name = 32,
         .calibration_Range = 33,
@@ -130,7 +134,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 17,
         .currenttestp1_Unit = 16,
         .currenttestp1_Unitps = 18,
-        .currenttestp2_Unit = 45,
+        .currenttestp2_Name = 16,
+        .currenttestp2_Unit = 42,
         .currenttestp2_Data = 26,
     },
     {
@@ -140,7 +145,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 42,
         .home_Unitps = 44,
         .home_Tara = 39,
-        .home_Use = 40,
+        .home_Status = 40,
         .calibration_Switch = 40,
         .calibration_Name = 38,
         .calibration_Range = 39,
@@ -154,7 +159,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 22,
         .currenttestp1_Unit = 21,
         .currenttestp1_Unitps = 23,
-        .currenttestp2_Unit = 46,
+        .currenttestp2_Name = 17,
+        .currenttestp2_Unit = 43,
         .currenttestp2_Data = 27,
     },
     {
@@ -164,7 +170,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 49,
         .home_Unitps = 51,
         .home_Tara = 46,
-        .home_Use = 47,
+        .home_Status = 47,
         .calibration_Switch = 46,
         .calibration_Name = 44,
         .calibration_Range = 45,
@@ -178,7 +184,8 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 27,
         .currenttestp1_Unit = 26,
         .currenttestp1_Unitps = 28,
-        .currenttestp2_Unit = 47,
+        .currenttestp2_Name = 20,
+        .currenttestp2_Unit = 44,
         .currenttestp2_Data = 28,
     },
     {
@@ -188,7 +195,7 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .home_Unit = 56,
         .home_Unitps = 58,
         .home_Tara = 53,
-        .home_Use = 54,
+        .home_Status = 54,
         .calibration_Switch = 52,
         .calibration_Name = 50,
         .calibration_Range = 51,
@@ -202,11 +209,10 @@ IdSx_t IdSx[NUM_SENSORS] = {
         .currenttestp1_Dataps = 32,
         .currenttestp1_Unit = 31,
         .currenttestp1_Unitps = 33,
-        .currenttestp2_Unit = 48,
+        .currenttestp2_Name = 21,
+        .currenttestp2_Unit = 45,
         .currenttestp2_Data = 29,
     }};
-
-page_t page = PAGE_HOME;
 
 /*
 ███╗   ██╗███████╗██╗  ██╗████████╗██╗ ██████╗ ███╗   ██╗     ██████╗ ██████╗ ██████╗ ███████╗
@@ -257,6 +263,10 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
                 SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
             else if (component_id == 0x19 && event == 0x04)
                 SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            else if (component_id == 0x3B && event == 0x01)
+                SEND_EMPTY_MSG(main_queue, GOTO_NEW_TEST_FROM_HOME, portMAX_DELAY)
+            else if (component_id == 0x3B && event == 0x02)
+                SEND_EMPTY_MSG(main_queue, GOTO_CURRENT_TEST_FROM_HOME, portMAX_DELAY)
         }
         else if (page == PAGE_SYSTEM_SETTINGS)
         {
@@ -604,6 +614,11 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
             ESP_LOGW(TAG, "page:0x%02x || component_id:0x%02x || event:0x%02x", page, component_id, event);
         }
     }
+    else if (cmd_id == NUMERIC_DATA_ID)
+    {
+        int32_t data = cmd->numeric_data.data;
+        SEND_I32_MSG(main_queue, TIME_RTC_DATA_RECEIVED, data, portMAX_DELAY);
+    }
     else if (cmd_id == CUSTOM_EVENT_ID)
     {
         uint8_t page = cmd->custom_event.page;
@@ -625,6 +640,11 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
             // CALIBRATION SENSOR 4  UNIT CHANGED
             else if (component_id == 0x4A)
                 SEND_CONTENT_STR_MSG(main_queue, SENSOR_UNIT_CHANGED, data, data_len, SENSOR_4_INDEX, portMAX_DELAY)
+        }
+        else if (page == PAGE_DATETIME)
+        {
+            if (component_id == 0x12)
+                SEND_ADDR_MSG(main_queue, DATETIME_RTC_ALL_AT_ONCE_RECEIVED, data, data_len, portMAX_DELAY)
         }
         else if (page == PAGE_INPUTCALIBP1)
         {
@@ -810,11 +830,15 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
     }
 }
 
-void nextion_1_timer(TimerHandle_t xTimer)
-{
-    SEND_EMPTY_MSG(main_queue, NEXTION_UPDATE, portMAX_DELAY);
-}
+/*
+ ██████╗ ███████╗███╗   ██╗███████╗██████╗  █████╗ ██╗
+██╔════╝ ██╔════╝████╗  ██║██╔════╝██╔══██╗██╔══██╗██║
+██║  ███╗█████╗  ██╔██╗ ██║█████╗  ██████╔╝███████║██║
+██║   ██║██╔══╝  ██║╚██╗██║██╔══╝  ██╔══██╗██╔══██║██║
+╚██████╔╝███████╗██║ ╚████║███████╗██║  ██║██║  ██║███████╗
+ ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
 
+*/
 nextion_t nextion_1 = {
     .rx_queue_size = 10,
     .uart_buffer_size = 1024,
@@ -826,22 +850,11 @@ nextion_t nextion_1 = {
     .code_rcv_cb = code_rcv_1_cb,
 };
 
-TimerHandle_t timer_handle = NULL;
+page_t page = NEXTION_PRE_INIT_PAGE;
 
-void nextion_1_init()
+void nextion_1_init_hardware()
 {
     nextion_init(&nextion_1);
-    timer_handle = xTimerCreate("nextion_timer", pdMS_TO_TICKS(200), pdTRUE, NULL, nextion_1_timer);
-}
-
-void nextion_1_start_timer()
-{
-    xTimerStart(timer_handle, portMAX_DELAY);
-}
-
-void nextion_1_stop_timer()
-{
-    xTimerStop(timer_handle, portMAX_DELAY);
 }
 
 void nextion_1_set_page(page_t new_page)
@@ -853,22 +866,56 @@ page_t nextion_1_get_page()
 {
     return page;
 }
+void nextion_1_goto_page(page_t page)
+{
+    nextion_command_page_by_pageIndex(&nextion_1, page);
+}
 
 /*
- ██████╗ ███████╗███╗   ██╗███████╗██████╗  █████╗ ██╗
-██╔════╝ ██╔════╝████╗  ██║██╔════╝██╔══██╗██╔══██╗██║
-██║  ███╗█████╗  ██╔██╗ ██║█████╗  ██████╔╝███████║██║
-██║   ██║██╔══╝  ██║╚██╗██║██╔══╝  ██╔══██╗██╔══██║██║
-╚██████╔╝███████╗██║ ╚████║███████╗██║  ██║██║  ██║███████╗
- ╚═════╝ ╚══════╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝
+████████╗██╗███╗   ███╗███████╗██████╗
+╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
+   ██║   ██║██╔████╔██║█████╗  ██████╔╝
+   ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
+   ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
+   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+
+*/
+TimerHandle_t timer_handle = NULL;
+void nextion_1_timer(TimerHandle_t xTimer)
+{
+    SEND_EMPTY_MSG(main_queue, NEXTION_UPDATE, portMAX_DELAY);
+}
+void nextion_1_init_timer()
+{
+    assert(timer_handle == NULL);
+    timer_handle = xTimerCreate("nextion_timer", pdMS_TO_TICKS(NEXTION_TIMER_PERIOD_MS), pdTRUE, NULL, nextion_1_timer);
+}
+void nextion_1_start_timer()
+{
+    assert(timer_handle != NULL);
+    xTimerStart(timer_handle, portMAX_DELAY);
+}
+
+void nextion_1_stop_timer()
+{
+    assert(timer_handle != NULL);
+    xTimerStop(timer_handle, portMAX_DELAY);
+}
+/*
+██╗███╗   ██╗████████╗██████╗  ██████╗
+██║████╗  ██║╚══██╔══╝██╔══██╗██╔═══██╗
+██║██╔██╗ ██║   ██║   ██████╔╝██║   ██║
+██║██║╚██╗██║   ██║   ██╔══██╗██║   ██║
+██║██║ ╚████║   ██║   ██║  ██║╚██████╔╝
+╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝
 
 */
 
-void nextion_1_change_page(page_t page)
+// WRITE LOADING
+void nextion_1_intro_write_loading(int content)
 {
-    nextion_goto_page_from_pageIndex(&nextion_1, page);
+    nextion_set_val_from_objId(&nextion_1, PAGE_INTRO, 2, content);
 }
-
 /*
 ██╗  ██╗ ██████╗ ███╗   ███╗███████╗
 ██║  ██║██╔═══██╗████╗ ████║██╔════╝
@@ -907,6 +954,12 @@ void nextion_1_home_write_unitps(int index, char *content)
 void nextion_1_home_write_name(int index, char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_HOME, IdSx[index].home_Name, content);
+}
+
+// WRITE STATUS
+void nextion_1_home_write_status(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_HOME, IdSx[index].home_Status, content);
 }
 
 /*
@@ -970,6 +1023,54 @@ void nextion_1_calibration_write_switch(int index, int32_t content)
 void nextion_1_calibration_write_counts(int index, char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CALIBRATION, IdSx[index].calibration_Counts, content);
+}
+
+/*
+██████╗  █████╗ ████████╗███████╗████████╗██╗███╗   ███╗███████╗
+██╔══██╗██╔══██╗╚══██╔══╝██╔════╝╚══██╔══╝██║████╗ ████║██╔════╝
+██║  ██║███████║   ██║   █████╗     ██║   ██║██╔████╔██║█████╗
+██║  ██║██╔══██║   ██║   ██╔══╝     ██║   ██║██║╚██╔╝██║██╔══╝
+██████╔╝██║  ██║   ██║   ███████╗   ██║   ██║██║ ╚═╝ ██║███████╗
+╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝
+
+*/
+
+void nextion_1_datetime_get_rtc_year()
+{
+    nextion_command_get_by_sysVar(&nextion_1, "rtc0");
+}
+void nextion_1_datetime_get_rtc_month()
+{
+    nextion_command_get_by_sysVar(&nextion_1, "rtc1");
+}
+void nextion_1_datetime_get_rtc_day()
+{
+    nextion_command_get_by_sysVar(&nextion_1, "rtc2");
+}
+void nextion_1_datetime_get_rtc_hour()
+{
+    nextion_command_get_by_sysVar(&nextion_1, "rtc3");
+}
+void nextion_1_datetime_get_rtc_minute()
+{
+    nextion_command_get_by_sysVar(&nextion_1, "rtc4");
+}
+void nextion_1_datetime_get_rtc_second()
+{
+    nextion_command_get_by_sysVar(&nextion_1, "rtc5");
+}
+void nextion_1_datetime_get_rtc_dateformat()
+{
+    nextion_command_get_by_objId(&nextion_1, PAGE_DATETIME, 20, "val");
+}
+void nextion_1_datetime_get_rtc_timeformat()
+{
+    nextion_command_get_by_objId(&nextion_1, PAGE_DATETIME, 21, "val");
+}
+
+void nextion_1_set_datetime(char *content)
+{
+    nextion_set_txt_from_objName_local(&nextion_1, "t255", content);
 }
 
 /*
@@ -1173,6 +1274,10 @@ void nextion_1_current_test_p1_write_title(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 7, content);
 }
+void nextion_1_current_test_p1_append_title(char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 7, content);
+}
 
 // SENSOR NAME
 void nextion_1_current_test_p1_write_sensor_name(int index, char *content)
@@ -1211,9 +1316,11 @@ void nextion_1_current_test_p1_write_status(char *content)
 }
 
 // POINTs
-void nextion_1_current_test_p1_write_points(char *content)
+void nextion_1_current_test_p1_write_points(int content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 6, content);
+    char buffer[5];
+    snprintf(buffer, sizeof(buffer), "%i", content);
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P1, 6, buffer);
 }
 
 // TIME
@@ -1236,6 +1343,16 @@ void nextion_1_current_test_p2_write_title(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 9, content);
 }
+void nextion_1_current_test_p2_append_title(char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 9, content);
+}
+
+// NAME
+void nextion_1_current_test_p2_write_sensor_name(int index, char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Name, content);
+}
 
 // UNIT
 void nextion_1_current_test_p2_write_unit(int index, char *content)
@@ -1247,9 +1364,9 @@ void nextion_1_current_test_p2_write_unit(int index, char *content)
 void nextion_1_current_test_p2_append_index(char *content)
 {
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, content);
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r\n");
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "----");
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 8, "\r\n");
 }
 void nextion_1_current_test_p2_clean_index()
 {
@@ -1260,9 +1377,9 @@ void nextion_1_current_test_p2_clean_index()
 void nextion_1_current_test_p2_append_time(char *content)
 {
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, content);
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r\n");
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "----");
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 18, "\r\n");
 }
 void nextion_1_current_test_p2_clean_time()
 {
@@ -1270,14 +1387,14 @@ void nextion_1_current_test_p2_clean_time()
 }
 
 // TABLE DATA
-void nextion_1_current_test_p2_append_data(int index, char *content)
+void nextion_1_current_test_p2_append_sensor_data(int index, char *content)
 {
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, content);
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "\r\n");
     nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "----");
-    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "\r");
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "\r\n");
 }
-void nextion_1_current_test_p2_clean_data(int index)
+void nextion_1_current_test_p2_clean_sensor_data(int index)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, IdSx[index].currenttestp2_Data, "");
 }
@@ -1289,9 +1406,11 @@ void nextion_1_current_test_p2_write_status(char *content)
 }
 
 // POINTs
-void nextion_1_current_test_p2_write_points(char *content)
+void nextion_1_current_test_p2_write_points(int content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 33, content);
+    char buffer[5];
+    snprintf(buffer, sizeof(buffer), "%i", content);
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P2, 33, buffer);
 }
 
 // TIME
@@ -1314,6 +1433,10 @@ void nextion_1_current_test_p3_write_title(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 16, content);
 }
+void nextion_1_current_test_p3_append_title(char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 16, content);
+}
 
 /*
 void nextion_1_current_test_p3_write_waveform(uint8_t content)
@@ -1323,16 +1446,20 @@ void nextion_1_current_test_p3_write_waveform(uint8_t content)
 */
 
 // CLEAN DATA
-void nextion_1_current_test_p3_clean_data()
+void nextion_1_current_test_p3_write_slope(int pos, int content)
 {
-    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, 150);
+    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 23 + pos, content);
+}
+void nextion_1_current_test_p3_clean_sensor_data()
+{
+    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 83, 150);
     nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
 }
 
 // APPEND DATA
 void nextion_1_current_test_p3_append_data(int content)
 {
-    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, content);
+    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 83, content);
     nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
 }
 
@@ -1343,13 +1470,57 @@ void nextion_1_current_test_p3_write_status(char *content)
 }
 
 // POINTs
-void nextion_1_current_test_p3_write_points(char *content)
+void nextion_1_current_test_p3_write_points(int content)
 {
-    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 19, content);
+    char buffer[5];
+    snprintf(buffer, sizeof(buffer), "%i", content);
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 19, buffer);
 }
 
 // TIME
 void nextion_1_current_test_p3_write_time(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 22, content);
+}
+
+// Y axis
+void nextion_1_current_test_p3_write_sensor_name(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, content);
+}
+void nextion_1_current_test_p3_write_sensor_unit(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 17, content);
+}
+void nextion_1_current_test_p3_write_Y1(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 8, content);
+}
+void nextion_1_current_test_p3_write_Y2(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 9, content);
+}
+void nextion_1_current_test_p3_write_Y3(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 10, content);
+}
+void nextion_1_current_test_p3_write_Y4(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 11, content);
+}
+void nextion_1_current_test_p3_write_Y5(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 12, content);
+}
+void nextion_1_current_test_p3_write_Y6(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 13, content);
+}
+void nextion_1_current_test_p3_write_Y7(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 14, content);
+}
+void nextion_1_current_test_p3_write_Y8(char *content)
+{
+    nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 15, content);
 }

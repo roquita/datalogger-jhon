@@ -53,12 +53,17 @@ void current_test_p3_loaded_cb(msg_t *msg);
 // HOME
 void tara_enabled_cb(msg_t *msg);
 void tara_disabled_cb(msg_t *msg);
+void goto_new_test_from_home_cb(msg_t *msg);
+void goto_current_test_from_home_cb(msg_t *msg);
 
 // CALIBRATION
 void sensor_disabled_cb(msg_t *msg);
 void sensor_enabled_cb(msg_t *msg);
 void sensor_limits_disabled(msg_t *msg);
 void sensor_limits_enabled(msg_t *msg);
+
+// DATETIME
+void datetime_rtc_all_at_once_received_cb(msg_t *msg);
 
 // INPUT CALIB P1
 void inputcalibp1_type_received_cb(msg_t *msg);
@@ -119,5 +124,11 @@ void sensor_class_received_cb(msg_t *msg);
 // NEXTION-TIMER
 void nextion_update_cb(msg_t *msg);
 
-// CURRENT TEST TIMER
-void test_timer_cb(msg_t *msg);
+//  MAIN TIMER
+void periodic_100ms_cb(msg_t *msg);
+void periodic_1s_cb(msg_t *msg);
+
+// TIME TIMER
+void time_rtc_start_sync_cb(msg_t *msg);
+void time_rtc_data_received_cb(msg_t *msg);
+void time_datetime_print_cb(msg_t *msg);

@@ -24,11 +24,119 @@ static int64_t _test_setup_timestamp[CURRENT_TEST_NUM_MAX];
 static int64_t _test_start_timestamp[CURRENT_TEST_NUM_MAX];
 static int64_t _test_stop_timestamp[CURRENT_TEST_NUM_MAX];
 static test_status_t _test_status[CURRENT_TEST_NUM_MAX] = {TEST_VOID};
-static TimerHandle_t _timer = NULL;
 static int _initialized_slot = CURRENT_TEST_NUM_MAX;
 static int _foreground_slot = CURRENT_TEST_NUM_MAX;
 static bool _operator_stop[CURRENT_TEST_NUM_MAX];
 
+static char buffer[50];
+
+static void test_force_stop(int slot)
+{
+    assert((slot >= 0) && (slot < CURRENT_TEST_NUM_MAX));
+
+    _test_status[slot] = TEST_DONE;
+    _test_stop_timestamp[slot] = time_get_timestamp();
+
+    if (_foreground_slot == slot)
+    {
+        current_test_plot_status(slot);
+    }
+}
+static char *test_get_status_str(int slot)
+{
+    assert((slot >= 0) && (slot < CURRENT_TEST_NUM_MAX));
+
+    test_status_t status = _test_status[slot];
+
+    switch (_test_status[slot])
+    {
+    case TEST_VOID:
+        return "ERROR 1";
+    case TEST_INITIALIZED:
+        return "ERROR 2";
+    case TEST_CONFIGURED:
+        return "NO TRIGGER";
+    case TEST_RUNNING:
+        return "RUNNING";
+    case TEST_DONE:
+        return "DONE";
+    default:
+        return "ERROR 3";
+    }
+}
+static int test_get_subindex(int input_enable, int sensor_index)
+{
+    int subindex = -1;
+    for (int i = 0; i <= sensor_index; i++)
+    {
+        bool input_enabled = (input_enable & 1) == 1;
+        if (input_enabled)
+        {
+            subindex++;
+        }
+        input_enable >>= 1;
+    }
+    subindex = (subindex < 0) ? 0 : subindex;
+    return subindex;
+}
+static void test_lock_sensors(int slot)
+{
+    assert(_test_status[slot] == TEST_INITIALIZED);
+    int input_enable = _test_setup[slot]->inputs.input_enable.byte;
+    for (int i = 0; i <= NUM_SENSORS; i++)
+    {
+        bool input_enabled = (input_enable & 1) == 1;
+        if (input_enabled)
+        {
+            sensor_set_as_busy(i);
+            nextion_1_home_write_status(i, sensor_get_status_str(i));
+            nextion_1_home_write_data(i, "- - -");
+            nextion_1_home_write_dataps(i, "- - -");
+        }
+        input_enable >>= 1;
+    }
+}
+static void test_unlock_sensors(int slot)
+{
+    assert(_test_status[slot] >= TEST_CONFIGURED);
+    int input_enable = _test_setup[slot]->inputs.input_enable.byte;
+    for (int i = 0; i <= NUM_SENSORS; i++)
+    {
+        bool input_enabled = (input_enable & 1) == 1;
+        if (input_enabled)
+        {
+            sensor_set_as_free(i);
+            nextion_1_home_write_status(i, sensor_get_status_str(i));
+        }
+        input_enable >>= 1;
+    }
+}
+
+int test_get_tara_enable()
+{
+    return _test_setup[_initialized_slot]->inputs.tara_enable.byte;
+}
+void test_print_elapsed_time()
+{
+    if (_foreground_slot == CURRENT_TEST_NUM_MAX)
+        return;
+
+    char buffer[20];
+
+    int64_t init = _test_setup_timestamp[_foreground_slot];
+    int64_t actual = time_get_timestamp();
+    int64_t elapsed = actual - init;
+
+    int hours = elapsed / 3600;
+    int minutes = (elapsed % 3600) / 60;
+    int seconds = elapsed % 60;
+
+    snprintf(buffer, sizeof(buffer), "%02i:%02i:%02i", hours, minutes, seconds);
+
+    nextion_1_current_test_p1_write_time(buffer);
+    nextion_1_current_test_p2_write_time(buffer);
+    nextion_1_current_test_p3_write_time(buffer);
+}
 /*
 ██████╗ ██╗   ██╗███╗   ██╗ █████╗ ███╗   ███╗██╗ ██████╗    ███╗   ███╗███████╗███╗   ███╗
 ██╔══██╗╚██╗ ██╔╝████╗  ██║██╔══██╗████╗ ████║██║██╔════╝    ████╗ ████║██╔════╝████╗ ████║
@@ -38,41 +146,28 @@ static bool _operator_stop[CURRENT_TEST_NUM_MAX];
 ╚═════╝    ╚═╝   ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝ ╚═════╝    ╚═╝     ╚═╝╚══════╝╚═╝     ╚═╝
 
 */
-static void free_test_setup(test_setup_t *test_setup)
+void free_test_setup(test_setup_t *test_setup)
 {
     free(test_setup);
 }
-static void free_test_table(test_table_t *test_table)
+void free_test_table(test_table_t *test_table)
 {
     double *peak_values = test_table->peak_values;
-    if (peak_values)
+    if (peak_values != NULL)
         free(peak_values);
 
     test_row_t *row = test_table->first_row;
     while (row != NULL)
     {
+        // printf("xxx \n");
         double *data = row->data;
-        if (data)
+        if (data != NULL)
             free(data);
 
         test_row_t *next_row = (test_row_t *)(row->next);
         free(row);
         row = next_row;
     }
-}
-
-/*
-████████╗██╗███╗   ███╗███████╗██████╗
-╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
-   ██║   ██║██╔████╔██║█████╗  ██████╔╝
-   ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
-   ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
-   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
-
-*/
-static void test_timer(TimerHandle_t xTimer)
-{
-    SEND_EMPTY_MSG(main_queue, TEST_TIMER, portMAX_DELAY);
 }
 
 /*
@@ -90,7 +185,7 @@ esp_err_t test_set_type(test_type_t *type)
         return ESP_ERR_NO_MEM;
 
     _test_setup[_initialized_slot]->type = *type;
-    new_test_print_type();
+    test_print_type();
 
     return ESP_OK;
 }
@@ -199,7 +294,7 @@ void test_print_inputs(void)
 void test_print_logging(void)
 {
     ESP_LOGI(TAG, "  LOGGING:");
-    switch (_test_setup->logging.condition)
+    switch (_test_setup[_initialized_slot]->logging.condition)
     {
     case LOGGING_CONDITION_INTERVAL_LOGGING:
         ESP_LOGI(TAG, "  condition: INTERVAL_LOGGING");
@@ -395,14 +490,14 @@ void test_print_start(void)
         ESP_LOGI(TAG, "  sensor_index: %d", _test_setup[_initialized_slot]->start.parameters.greater_than.sensor_index);
         ESP_LOGI(TAG, "  value: %lf", _test_setup[_initialized_slot]->start.parameters.greater_than.value);
         ESP_LOGI(TAG, "  current_value: %lf", _test_setup[_initialized_slot]->start.parameters.greater_than.current_value);
-        ESP_LOGI(TAG, "  first_point: %d [0 AT TRIGGER, 1 AT INITIAL VALUE]", _test_setup[_initialized_slot]->start.parameters.greater_than.first_point_taken_at);
+        ESP_LOGI(TAG, "  first_point: %d [0 AT TRIGGER, 1 AT INITIAL VALUE]", _test_setup[_initialized_slot]->start.parameters.greater_than.first_point);
         break;
     case START_CONDITION_LESS_THAN:
         ESP_LOGI(TAG, "  condition: LESS_THAN");
         ESP_LOGI(TAG, "  sensor_index: %d", _test_setup[_initialized_slot]->start.parameters.less_than.sensor_index);
         ESP_LOGI(TAG, "  value: %lf", _test_setup[_initialized_slot]->start.parameters.less_than.value);
         ESP_LOGI(TAG, "  current_value: %lf", _test_setup[_initialized_slot]->start.parameters.less_than.current_value);
-        ESP_LOGI(TAG, "  first_point: %d [0 AT TRIGGER, 1 AT INITIAL VALUE]", _test_setup[_initialized_slot]->start.parameters.less_than.first_point_taken_at);
+        ESP_LOGI(TAG, "  first_point: %d [0 AT TRIGGER, 1 AT INITIAL VALUE]", _test_setup[_initialized_slot]->start.parameters.less_than.first_point);
         break;
     default:
         ESP_LOGI(TAG, "  condition: %d", _test_setup[_initialized_slot]->logging.condition);
@@ -423,10 +518,10 @@ esp_err_t test_input_get_sensor_num_from_enablers(int *sensor_num, uint8_t enabl
 }
 esp_err_t test_get_sensor_index_from_combobox(int combobox_val, uint8_t *sensor_index)
 {
-    if (_test_setup == NULL)
+    if (_test_setup[_initialized_slot] == NULL)
         return ESP_ERR_NO_MEM;
 
-    uint16_t input_enable = _test_setup->inputs.input_enable.byte;
+    uint16_t input_enable = _test_setup[_initialized_slot]->inputs.input_enable.byte;
     for (uint8_t i = 0; i < NUM_SENSORS; i++)
     {
 
@@ -448,7 +543,7 @@ esp_err_t test_get_sensor_index_from_combobox(int combobox_val, uint8_t *sensor_
 
 esp_err_t test_get_logging_direction_from_combobox(int combobox_val, logging_direction_t *direction)
 {
-    if (_test_setup == NULL)
+    if (_test_setup[_initialized_slot] == NULL)
         return ESP_ERR_NO_MEM;
 
     if (combobox_val == 0)
@@ -469,7 +564,7 @@ esp_err_t test_get_logging_direction_from_combobox(int combobox_val, logging_dir
 }
 esp_err_t test_get_graph_option_from_combobox(int combobox_val, axis_option_t *axis_option)
 {
-    if (_test_setup == NULL)
+    if (_test_setup[_initialized_slot] == NULL)
         return ESP_ERR_NO_MEM;
 
     if ((combobox_val >= 0) && (combobox_val <= 3))
@@ -480,7 +575,7 @@ esp_err_t test_get_graph_option_from_combobox(int combobox_val, axis_option_t *a
     else if ((combobox_val >= 4) && (combobox_val <= 11))
     {
         combobox_val -= 4;
-        uint16_t input_enable = _test_setup->inputs.input_enable.byte;
+        uint16_t input_enable = _test_setup[_initialized_slot]->inputs.input_enable.byte;
         for (uint8_t i = 0; i < NUM_SENSORS; i++)
         {
 
@@ -505,16 +600,16 @@ esp_err_t test_get_graph_option_from_combobox(int combobox_val, axis_option_t *a
         return ESP_FAIL;
     }
 }
-esp_err_t test_get_start_first_point_from_multiradio(int multiradio_val, first_point_taken_at_t *first_point)
+esp_err_t test_get_start_first_point_from_multiradio(int multiradio_val, first_point_t *first_point)
 {
     if (multiradio_val == 0)
     {
-        *first_point = FIRST_POINT_TAKEN_AT_TRIGGER;
+        *first_point = TAKEN_AT_TRIGGER;
         return ESP_OK;
     }
     else if (multiradio_val == 1)
     {
-        *first_point = FIRST_POINT_TAKEN_AT_INITIAL_VALUE;
+        *first_point = TAKEN_AT_INITIAL_VALUE;
         return ESP_OK;
     }
     else
@@ -589,15 +684,15 @@ esp_err_t test_get_start_page(page_t *page)
 }
 
 /*
-██████╗ ██╗      ██████╗ ████████╗████████╗██╗███╗   ██╗ ██████╗
-██╔══██╗██║     ██╔═══██╗╚══██╔══╝╚══██╔══╝██║████╗  ██║██╔════╝
-██████╔╝██║     ██║   ██║   ██║      ██║   ██║██╔██╗ ██║██║  ███╗
-██╔═══╝ ██║     ██║   ██║   ██║      ██║   ██║██║╚██╗██║██║   ██║
-██║     ███████╗╚██████╔╝   ██║      ██║   ██║██║ ╚████║╚██████╔╝
-╚═╝     ╚══════╝ ╚═════╝    ╚═╝      ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝
+████████╗ █████╗ ██████╗ ██╗     ███████╗
+╚══██╔══╝██╔══██╗██╔══██╗██║     ██╔════╝
+   ██║   ███████║██████╔╝██║     █████╗
+   ██║   ██╔══██║██╔══██╗██║     ██╔══╝
+   ██║   ██║  ██║██████╔╝███████╗███████╗
+   ╚═╝   ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
 
 */
-static esp_err_t test_table_add_row(int slot)
+esp_err_t test_table_add_row(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -607,8 +702,8 @@ static esp_err_t test_table_add_row(int slot)
     int row_num = test_table->row_num;
     int sensor_num = test_setup->inputs.sensor_num;
     double *peak_values = test_table->peak_values;
-    uint8_t input_enable = test_setup->inputs.input_enable;
-    uint8_t tara_enable = test_setup->inputs.tara_enable;
+    uint8_t input_enable = test_setup->inputs.input_enable.byte;
+    uint8_t tara_enable = test_setup->inputs.tara_enable.byte;
 
     // ALLOC PEAK VALUES IF NOT
     if (peak_values == NULL)
@@ -622,8 +717,8 @@ static esp_err_t test_table_add_row(int slot)
         test_table->peak_values = peak_values;
         for (int i = 0; i < sensor_num; i++)
         {
-            *peak_values = -999999.0;
-            peak_values++;
+            *(peak_values + i) = -999999.0;
+            // peak_values++;
         }
     }
 
@@ -685,26 +780,55 @@ static esp_err_t test_table_add_row(int slot)
     // ATTACH NEW-ROW TO TABLE
     if (test_table->first_row == NULL)
     {
+        // printf("aaa\n");
         test_table->first_row = row;
         test_table->last_row = row;
     }
     else
     {
+        // printf("bbb\n");
         test_table->last_row->next = row;
         test_table->last_row = row;
     }
 
     return ESP_OK;
 }
-static void test_update_screen_p1(void)
+/*
+██████╗ ██╗      ██████╗ ████████╗████████╗██╗███╗   ██╗ ██████╗
+██╔══██╗██║     ██╔═══██╗╚══██╔══╝╚══██╔══╝██║████╗  ██║██╔════╝
+██████╔╝██║     ██║   ██║   ██║      ██║   ██║██╔██╗ ██║██║  ███╗
+██╔═══╝ ██║     ██║   ██║   ██║      ██║   ██║██║╚██╗██║██║   ██║
+██║     ███████╗╚██████╔╝   ██║      ██║   ██║██║ ╚████║╚██████╔╝
+╚═╝     ╚══════╝ ╚═════╝    ╚═╝      ╚═╝   ╚═╝╚═╝  ╚═══╝ ╚═════╝
+
+*/
+void current_test_plot_status(int slot)
+{
+    assert((slot >= 0) && (slot < CURRENT_TEST_NUM_MAX));
+
+    nextion_1_current_test_p1_write_status(test_get_status_str(slot));
+    nextion_1_current_test_p2_write_status(test_get_status_str(slot));
+    nextion_1_current_test_p3_write_status(test_get_status_str(slot));
+}
+void current_test_plot_points(int slot)
+{
+    assert((slot >= 0) && (slot < CURRENT_TEST_NUM_MAX));
+
+    test_table_t *test_table = _test_table[slot];
+    nextion_1_current_test_p1_write_points(test_table->row_num);
+    nextion_1_current_test_p2_write_points(test_table->row_num);
+    nextion_1_current_test_p3_write_points(test_table->row_num);
+}
+void current_test_plot_last_data_p1(void)
 {
     if (_foreground_slot == CURRENT_TEST_NUM_MAX)
         return;
 
     // test vars
-    test_inputs_t *test_inputs = _test_setup[_foreground_slot]->inputs;
+    test_inputs_t *test_inputs = &(_test_setup[_foreground_slot]->inputs);
     uint8_t input_enable = test_inputs->input_enable.byte;
     uint8_t tara_enable = test_inputs->tara_enable.byte;
+    // ESP_LOGI(TAG, "input_enable:%d || tara_enable:%d", input_enable, tara_enable);
 
     for (int sensor_index = 0; sensor_index < NUM_SENSORS; sensor_index++)
     {
@@ -713,16 +837,16 @@ static void test_update_screen_p1(void)
         if (input_enabled)
         {
             char *real_str = sensor_get_real_str(sensor_index, tara_enabled);
-            char *realps_str = sensor_get_realps(sensor_index);
             nextion_1_current_test_p1_write_data(sensor_index, real_str);
+            char *realps_str = sensor_get_realps_str(sensor_index);
             nextion_1_current_test_p1_write_dataps(sensor_index, realps_str);
         }
 
-        input_enable >> 1;
-        tara_enable >> 1;
+        input_enable >>= 1;
+        tara_enable >>= 1;
     }
 }
-static void test_update_screen_p2_p3(int slot)
+void current_test_plot_last_data_p2_p3(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -731,10 +855,23 @@ static void test_update_screen_p2_p3(int slot)
     test_graph_t *test_graph = &(test_setup->graph);
 
     // test vars
-    uint8_t input_enable = test_setup->inputs.input_enable;
-    uint8_t tara_enable = test_setup->inputs.tara_enable;
+    uint8_t input_enable = test_setup->inputs.input_enable.byte;
+    uint8_t tara_enable = test_setup->inputs.tara_enable.byte;
     axis_option_t x_axis_option = test_graph->x_axis_option;
     axis_option_t y_axis_option = test_graph->y_axis_option;
+
+    // PRINT INDEX AND TIME
+    {
+        test_row_t *row = test_table->last_row;
+        int row_index = row->index;
+        test_time_t time = row->time;
+
+        snprintf(buffer, sizeof(buffer), "%i", row_index);
+        nextion_1_current_test_p2_append_index(buffer);
+
+        snprintf(buffer, sizeof(buffer), "%02i:%02i:%02.0f", time.h, time.m, time.s);
+        nextion_1_current_test_p2_append_time(buffer);
+    }
 
     // PRINT ON TABLE AND GRAPH
     for (int sensor_index = 0; sensor_index < NUM_SENSORS; sensor_index++)
@@ -742,17 +879,9 @@ static void test_update_screen_p2_p3(int slot)
         // TABLE
         bool sensor_enabled = (input_enable & 1) == 1;
         bool tara_enabled = (tara_enable & 1) == 1;
-        if (sensor_enabled)
-        {
-            char *content = sensor_get_real_str(sensor_index, tara_enabled);
-            nextion_1_current_test_p2_append_sensor(sensor_index, content);
-        }
-        else
-        {
-            nextion_1_current_test_p2_append_sensor(sensor_index, "");
-        }
-        input_enable >>= 1;
-        tara_enable >>= 1;
+
+        char *content = sensor_enabled ? sensor_get_real_str(sensor_index, tara_enabled) : "";
+        nextion_1_current_test_p2_append_sensor_data(sensor_index, content);
 
         // GRAPH
         bool sensor_selected_for_graph = (y_axis_option == (uint32_t)sensor_index);
@@ -762,9 +891,208 @@ static void test_update_screen_p2_p3(int slot)
             double capacity = sensor_get_capacity(sensor_index);
             int value = 100.0 * real / capacity;
             value = (value > 100) ? 100 : value;
-            nextion_1_current_test_p3_append_value(value);
+            //nextion_1_current_test_p3_append_data(50);
+            nextion_1_current_test_p3_append_data(value);
+        }
+
+        input_enable >>= 1;
+        tara_enable >>= 1;
+    }
+}
+void current_test_load_foreground_slot(void)
+{
+    assert(_foreground_slot != CURRENT_TEST_NUM_MAX);
+    assert(_test_status[_foreground_slot] >= TEST_CONFIGURED);
+
+    // GLOBAL VARS
+    test_table_t *test_table = _test_table[_foreground_slot];
+    test_setup_t *test_setup = _test_setup[_foreground_slot];
+
+    // test vars
+    int input_enable = test_setup->inputs.input_enable.byte;
+    axis_option_t x_axis_option = test_setup->graph.x_axis_option;
+    axis_option_t y_axis_option = test_setup->graph.y_axis_option;
+
+    // set title on p1 p2 p3
+    char *test_name = _test_setup[_foreground_slot]->test_name;
+    char *datetime = time_get_datetime_formated(true, _test_setup_timestamp[_foreground_slot]);
+
+    nextion_1_current_test_p1_write_title(test_name);
+    nextion_1_current_test_p1_append_title(" - ");
+    nextion_1_current_test_p1_append_title(datetime);
+
+    nextion_1_current_test_p2_write_title(test_name);
+    nextion_1_current_test_p2_append_title(" - ");
+    nextion_1_current_test_p2_append_title(datetime);
+
+    nextion_1_current_test_p3_write_title(test_name);
+    nextion_1_current_test_p3_append_title(" - ");
+    nextion_1_current_test_p3_append_title(datetime);
+
+    // set status on p1 p2 p3
+    nextion_1_current_test_p1_write_status(test_get_status_str(_foreground_slot));
+    nextion_1_current_test_p2_write_status(test_get_status_str(_foreground_slot));
+    nextion_1_current_test_p3_write_status(test_get_status_str(_foreground_slot));
+
+    // set points on p1 p2 p3
+    nextion_1_current_test_p1_write_points(test_table->row_num);
+    nextion_1_current_test_p2_write_points(test_table->row_num);
+    nextion_1_current_test_p3_write_points(test_table->row_num);
+
+    // set time on p1 p2 p3
+    {
+        char buffer[20];
+        int64_t elapsed_time = time_get_timestamp() - _test_setup_timestamp[_foreground_slot];
+        int hours = elapsed_time / 3600;
+        int minutes = (elapsed_time % 3600) / 60;
+        int seconds = elapsed_time % 60;
+        snprintf(buffer, sizeof(buffer), "%02i:%02i:%02i", hours, minutes, seconds);
+
+        nextion_1_current_test_p1_write_time(buffer);
+        nextion_1_current_test_p2_write_time(buffer);
+        nextion_1_current_test_p3_write_time(buffer);
+    }
+
+    // set Y axis info on p3
+    {
+        bool is_sensor = ((y_axis_option >= AXIS_SENSOR_INDEX_0) && (y_axis_option < AXIS_MAX));
+        if (is_sensor)
+        {
+            int index = y_axis_option;
+            nextion_1_current_test_p3_write_sensor_name(sensor_get_name(index));
+            nextion_1_current_test_p3_write_sensor_unit(sensor_get_unit_str(index));
+
+            double capacity = sensor_get_capacity(index);
+            int num_decimals = sensor_get_num_decimals(index);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 1.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y1(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 2.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y2(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 3.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y3(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 4.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y4(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 5.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y5(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 6.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y6(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 7.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y7(buffer);
+
+            snprintf(buffer, sizeof(buffer), "%.*lf", num_decimals, 8.0 * capacity / 8.0);
+            nextion_1_current_test_p3_write_Y8(buffer);
         }
     }
+
+    // set sensors info on p1 p2
+    {
+        int enablers = input_enable;
+        for (int i = 0; i < NUM_SENSORS; i++)
+        {
+            bool input_enabled = (enablers & 1) == 1;
+
+            // p1
+            nextion_1_current_test_p1_write_sensor_name(i, input_enabled ? sensor_get_name(i) : CURRENT_TEST_SENSOR_NAME_DEFAULT);
+            nextion_1_current_test_p1_write_data(i, CURRENT_TEST_DATA_DEFAULT);
+            nextion_1_current_test_p1_write_unit(i, input_enabled ? sensor_get_unit_str(i) : CURRENT_TEST_UNIT_DEFAULT);
+            nextion_1_current_test_p1_write_dataps(i, CURRENT_TEST_DATAPS_DEFAULT);
+            nextion_1_current_test_p1_write_unitps(i, input_enabled ? sensor_get_unitps_str(i) : CURRENT_TEST_UNITPS_DEFAULT);
+
+            // p2
+            nextion_1_current_test_p2_write_sensor_name(i, input_enabled ? sensor_get_name(i) : CURRENT_TEST_SENSOR_NAME_DEFAULT);
+            nextion_1_current_test_p2_write_unit(i, input_enabled ? sensor_get_unit_str(i) : CURRENT_TEST_UNIT_DEFAULT);
+            nextion_1_current_test_p2_clean_sensor_data(i);
+
+            enablers >>= 1;
+        }
+    }
+
+    // load sensor data on p2
+    {
+        nextion_1_current_test_p2_clean_index();
+        nextion_1_current_test_p2_clean_time();
+
+        char buffer[15];
+        test_row_t *row = test_table->first_row;
+        while (row != NULL)
+        {
+            // index
+            snprintf(buffer, sizeof(buffer), "%i", row->index);
+            nextion_1_current_test_p2_append_index(buffer);
+
+            // time
+            snprintf(buffer, sizeof(buffer), "%2i:%2i:%2.2f", row->time.h, row->time.m, row->time.s);
+            nextion_1_current_test_p2_append_time(buffer);
+
+            // sensor
+            int enablers = input_enable;
+            double *data = row->data;
+            for (int i = 0; i < NUM_SENSORS; i++)
+            {
+                bool input_enabled = (enablers & 1) == 1;
+                if (input_enabled)
+                {
+                    snprintf(buffer, sizeof(buffer), "%.*lf", sensor_get_num_decimals(i), *data);
+                    nextion_1_current_test_p2_append_sensor_data(i, buffer);
+                    data++;
+                }
+                else
+                {
+                    nextion_1_current_test_p2_append_sensor_data(i, "");
+                }
+
+                enablers >>= 1;
+            }
+
+            // next row
+            row = (test_row_t *)(row->next);
+        }
+    }
+
+    // load sensor data on p3
+    {
+        nextion_1_current_test_p3_clean_sensor_data();
+
+        bool sensor_selected_for_graph = ((y_axis_option >= AXIS_SENSOR_INDEX_0) && (y_axis_option < AXIS_MAX));
+        if (!sensor_selected_for_graph)
+        {
+            ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+            return;
+        }
+
+        int subindex = test_get_subindex(input_enable, y_axis_option);
+        int row_num = test_table->row_num;
+        int excedent_row_num = (row_num > 60) ? row_num - 60 : 0;
+        test_row_t *row = test_table->first_row;
+
+        while (excedent_row_num > 0)
+        {
+            row = (test_row_t *)(row->next);
+            excedent_row_num--;
+        }
+
+        for (int i = 0; i < (row_num - excedent_row_num); i++)
+        {
+            double real = *((row->data) + subindex);
+            double capacity = sensor_get_capacity(y_axis_option);
+            int value = 100.0 * real / capacity;
+            value = (value > 100) ? 100 : value;
+            nextion_1_current_test_p3_write_slope(i, value);
+
+            // next row
+            row = (test_row_t *)(row->next);
+        }
+    }
+}
+void current_test_reset_default_p1_p2_p3()
+{
 }
 
 /*
@@ -777,7 +1105,7 @@ static void test_update_screen_p2_p3(int slot)
 
 */
 
-static esp_err_t test_start_condition_trigger_immediately(int slot)
+esp_err_t test_start_condition_trigger_immediately(int slot)
 {
     // EXECUTE CONDITION
     _test_status[slot] = TEST_RUNNING;
@@ -790,12 +1118,17 @@ static esp_err_t test_start_condition_trigger_immediately(int slot)
         ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         return ESP_FAIL;
     }
-    if (_foreground_slot == slot)
-        test_update_screen_p2_p3(slot);
 
-    return ESP_OK:
+    if (_foreground_slot == slot)
+    {
+        current_test_plot_points(slot);
+        current_test_plot_status(slot);
+        current_test_plot_last_data_p2_p3(slot);
+    }
+
+    return ESP_OK;
 }
-static esp_err_t test_start_condition_time_delay(int slot)
+esp_err_t test_start_condition_time_delay(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -817,17 +1150,22 @@ static esp_err_t test_start_condition_time_delay(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+            current_test_plot_status(slot);
+        }
     }
 
     return ESP_OK;
 }
-static esp_err_t test_start_condition_greater_than(int slot)
+esp_err_t test_start_condition_greater_than(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
     test_table_t *test_table = _test_table[slot];
     test_start_t *test_start = &(test_setup->start);
+    test_inputs_t *test_input = &(test_setup->inputs);
 
     // EXECUTE CONDITION
     // start parameters
@@ -835,6 +1173,7 @@ static esp_err_t test_start_condition_greater_than(int slot)
     double value = test_start->parameters.greater_than.value;
     double current_value = test_start->parameters.greater_than.current_value;
     first_point_t first_point = test_start->parameters.greater_than.first_point;
+    int tara_enable = test_input->tara_enable.byte;
 
     // check for first point at initial value
     bool need_first_point = (first_point == TAKEN_AT_INITIAL_VALUE) && (test_table->row_num == 0);
@@ -847,11 +1186,14 @@ static esp_err_t test_start_condition_greater_than(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+        }
     }
 
     // check for condition
-    bool condition_done = sensor_get_real(sensor_index) > value;
+    bool condition_done = sensor_get_real(sensor_index, (tara_enable >> sensor_index) & 1) > value;
     if (condition_done)
     {
         _test_status[slot] = TEST_RUNNING;
@@ -868,18 +1210,26 @@ static esp_err_t test_start_condition_greater_than(int slot)
                 return ESP_FAIL;
             }
             if (_foreground_slot == slot)
-                test_update_screen_p2_p3(slot);
+            {
+                current_test_plot_points(slot);
+                current_test_plot_last_data_p2_p3(slot);
+            }
+        }
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
         }
     }
 
     return ESP_OK;
 }
-static esp_err_t test_start_condition_less_than(int slot)
+esp_err_t test_start_condition_less_than(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
     test_table_t *test_table = _test_table[slot];
     test_start_t *test_start = &(test_setup->start);
+    test_inputs_t *test_input = &(test_setup->inputs);
 
     // EXECUTE CONDITION
     // start parameters
@@ -887,6 +1237,7 @@ static esp_err_t test_start_condition_less_than(int slot)
     double value = test_start->parameters.less_than.value;
     double current_value = test_start->parameters.less_than.current_value;
     first_point_t first_point = test_start->parameters.less_than.first_point;
+    int tara_enable = test_input->tara_enable.byte;
 
     // check for first point at initial value
     bool need_first_point = (first_point == TAKEN_AT_INITIAL_VALUE) && (test_table->row_num == 0);
@@ -899,11 +1250,14 @@ static esp_err_t test_start_condition_less_than(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+        }
     }
 
     // check for condition
-    bool condition_done = sensor_get_real(sensor_index) > value;
+    bool condition_done = sensor_get_real(sensor_index, (tara_enable >> sensor_index) & 1) > value;
     if (condition_done)
     {
         _test_status[slot] = TEST_RUNNING;
@@ -920,7 +1274,14 @@ static esp_err_t test_start_condition_less_than(int slot)
                 return ESP_FAIL;
             }
             if (_foreground_slot == slot)
-                test_update_screen_p2_p3(slot);
+            {
+                current_test_plot_points(slot);
+                current_test_plot_last_data_p2_p3(slot);
+            }
+        }
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
         }
     }
 
@@ -936,47 +1297,61 @@ static esp_err_t test_start_condition_less_than(int slot)
 ╚══════╝   ╚═╝    ╚═════╝ ╚═╝          ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═════╝ ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 
 */
-static esp_err_t test_stop_condition_greater_than(int slot)
+esp_err_t test_stop_condition_greater_than(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
     test_table_t *test_table = _test_table[slot];
     test_stop_t *test_stop = &(test_setup->stop);
+    test_inputs_t *test_input = &(test_setup->inputs);
 
     // test vars
     int sensor_index = test_stop->parameters.greater_than.sensor_index;
     double value = test_stop->parameters.greater_than.value;
+    int tara_enable = test_input->tara_enable.byte;
 
     // execute condition
-    bool condition_done = sensor_get_real(sensor_index) > value;
+    bool condition_done = sensor_get_real(sensor_index, (tara_enable >> sensor_index) & 1) > value;
     if (condition_done)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_less_than(int slot)
+esp_err_t test_stop_condition_less_than(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
     test_table_t *test_table = _test_table[slot];
     test_stop_t *test_stop = &(test_setup->stop);
+    test_inputs_t *test_input = &(test_setup->inputs);
 
     // test vars
     int sensor_index = test_stop->parameters.less_than.sensor_index;
     double value = test_stop->parameters.less_than.value;
+    int tara_enable = test_input->tara_enable.byte;
 
     // execute condition
-    bool condition_done = sensor_get_real(sensor_index) < value;
+    bool condition_done = sensor_get_real(sensor_index, (tara_enable >> sensor_index) & 1) < value;
     if (condition_done)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_time_delay(int slot)
+esp_err_t test_stop_condition_time_delay(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -992,10 +1367,15 @@ static esp_err_t test_stop_condition_time_delay(int slot)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_distance_up(int slot)
+esp_err_t test_stop_condition_distance_up(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1046,10 +1426,15 @@ static esp_err_t test_stop_condition_distance_up(int slot)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_distance_down(int slot)
+esp_err_t test_stop_condition_distance_down(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1100,10 +1485,15 @@ static esp_err_t test_stop_condition_distance_down(int slot)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_percent_drop(int slot)
+esp_err_t test_stop_condition_percent_drop(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1155,10 +1545,15 @@ static esp_err_t test_stop_condition_percent_drop(int slot)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_percent_strain(int slot)
+esp_err_t test_stop_condition_percent_strain(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1210,10 +1605,15 @@ static esp_err_t test_stop_condition_percent_strain(int slot)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_percent_stress_drop(int slot)
+esp_err_t test_stop_condition_percent_stress_drop(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1265,15 +1665,26 @@ static esp_err_t test_stop_condition_percent_stress_drop(int slot)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_stop_condition_operator_stop(int slot)
+
+esp_err_t test_stop_condition_operator_stop(int slot)
 {
     if (_operator_stop[slot] == true)
     {
         _test_status[slot] = TEST_DONE;
         _test_stop_timestamp[slot] = time_get_timestamp();
+
+        if (_foreground_slot == slot)
+        {
+            current_test_plot_status(slot);
+        }
     }
     return ESP_OK;
 }
@@ -1288,7 +1699,7 @@ static esp_err_t test_stop_condition_operator_stop(int slot)
 
 */
 
-static esp_err_t test_logging_condition_interval_logging(int slot)
+esp_err_t test_logging_condition_interval_logging(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1348,11 +1759,14 @@ static esp_err_t test_logging_condition_interval_logging(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_logging_condition_linear_time_interval(int slot)
+esp_err_t test_logging_condition_linear_time_interval(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1376,11 +1790,14 @@ static esp_err_t test_logging_condition_linear_time_interval(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_logging_condition_interval_logging_table(int slot)
+esp_err_t test_logging_condition_interval_logging_table(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1443,11 +1860,14 @@ static esp_err_t test_logging_condition_interval_logging_table(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+        }
     }
     return ESP_OK;
 }
-static esp_err_t test_logging_condition_elapsed_time_table(int slot)
+esp_err_t test_logging_condition_elapsed_time_table(int slot)
 {
     // GLOBAL VARS
     test_setup_t *test_setup = _test_setup[slot];
@@ -1476,9 +1896,39 @@ static esp_err_t test_logging_condition_elapsed_time_table(int slot)
             return ESP_FAIL;
         }
         if (_foreground_slot == slot)
-            test_update_screen_p2_p3(slot);
+        {
+            current_test_plot_points(slot);
+            current_test_plot_last_data_p2_p3(slot);
+        }
     }
     return ESP_OK;
+}
+/*
+███████╗████████╗ ██████╗ ██████╗  █████╗  ██████╗ ███████╗
+██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔══██╗██╔════╝ ██╔════╝
+███████╗   ██║   ██║   ██║██████╔╝███████║██║  ███╗█████╗
+╚════██║   ██║   ██║   ██║██╔══██╗██╔══██║██║   ██║██╔══╝
+███████║   ██║   ╚██████╔╝██║  ██║██║  ██║╚██████╔╝███████╗
+╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
+
+*/
+void test_init_storage(void)
+{
+    // init file system
+
+    // init usb
+}
+void test_save_on_external_usb(int slot)
+{
+    assert(_test_status[slot] >= TEST_CONFIGURED);
+
+    // save on usb
+}
+void test_save_on_internal_filesystem(int slot)
+{
+    assert(_test_status[slot] >= TEST_CONFIGURED);
+
+    // save on internal filesystem
 }
 
 /*
@@ -1490,7 +1940,18 @@ static esp_err_t test_logging_condition_elapsed_time_table(int slot)
 ╚══════╝╚══════╝ ╚═════╝    ╚═╝
 
 */
-static esp_err_t test_get_available_slot(int *slot)
+esp_err_t test_is_an_slot_in_execution()
+{
+    for (int i = 0; i < CURRENT_TEST_NUM_MAX; i++)
+    {
+        if ((_test_status[i] == TEST_CONFIGURED) || (_test_status[i] == TEST_RUNNING))
+        {
+            return ESP_OK;
+        }
+    }
+    return ESP_FAIL;
+}
+esp_err_t test_get_available_slot(int *slot)
 {
     for (int i = 0; i < CURRENT_TEST_NUM_MAX; i++)
     {
@@ -1501,10 +1962,10 @@ static esp_err_t test_get_available_slot(int *slot)
         }
     }
 
-    ESP_LOGE(TAG, "%s, line: %d", __FILE__, __LINE__);
+    ESP_LOGW(TAG, "%s, line: %d", __FILE__, __LINE__);
     return ESP_FAIL;
 }
-static void test_deinit_all_initialized()
+void test_deinit_all_slot_initialized()
 {
     _initialized_slot = CURRENT_TEST_NUM_MAX;
 
@@ -1512,67 +1973,36 @@ static void test_deinit_all_initialized()
     {
         if (_test_status[i] == TEST_INITIALIZED)
         {
-            test_free_setup(_test_setup[i]);
-            test_free_table(_test_table[i]);
+            free_test_setup(_test_setup[i]);
+            free_test_table(_test_table[i]);
             _test_status[i] = TEST_VOID;
         }
     }
 }
-static void test_deinit_configured(int slot)
+void test_deinit_slot_configured(int slot)
 {
+    assert(_test_status[slot] >= TEST_CONFIGURED);
+
+    // unlock sensors
+    test_unlock_sensors(slot);
+
     // free slot and dynamic resources
     free_test_setup(_test_setup[slot]);
     free_test_table(_test_table[slot]);
+
     _test_status[slot] = TEST_VOID;
     if (_foreground_slot == slot)
     {
         _foreground_slot = CURRENT_TEST_NUM_MAX;
-
-        // clean pages current test p1 in nextion
-        nextion_1_current_test_p1_write_title(CURRENT_TEST_TITLE_DEFAULT);
-        for (int i = 0; i < NUM_SENSORS; i++)
-        {
-            nextion_1_current_test_p1_write_data(i, CURRENT_TEST_DATA_DEFAULT);
-            nextion_1_current_test_p1_write_dataps(i, CURRENT_TEST_DATAPS_DEFAULT);
-        }
-        nextion_1_current_test_p1_write_status(CURRENT_TEST_STATUS_DEFAULT);
-        nextion_1_current_test_p1_write_points(CURRENT_TEST_POINTS_DEFAULT);
-        nextion_1_current_test_p1_write_time(CURRENT_TEST_TIME_DEFAULT);
-
-        // clean pages current test p2 in nextion
-        nextion_1_current_test_p2_write_title(CURRENT_TEST_TITLE_DEFAULT);
-        nextion_1_current_test_p2_clean_index();
-        nextion_1_current_test_p2_clean_time();
-        for (int i = 0; i < NUM_SENSORS; i++)
-        {
-            nextion_1_current_test_p2_write_unit(i, CURRENT_TEST_UNIT_DEFAULT);
-            nextion_1_current_test_p2_clean_data(i);
-        }
-        nextion_1_current_test_p2_write_status(CURRENT_TEST_STATUS_DEFAULT);
-        nextion_1_current_test_p2_write_points(CURRENT_TEST_POINTS_DEFAULT);
-        nextion_1_current_test_p2_write_time(CURRENT_TEST_TIME_DEFAULT);
-
-        // clean pages current test p3 in nextion
-        nextion_1_current_test_p3_write_title(CURRENT_TEST_TITLE_DEFAULT);
-        nextion_1_current_test_p3_clean_data();
-        nextion_1_current_test_p3_write_status(CURRENT_TEST_STATUS_DEFAULT);
-        nextion_1_current_test_p3_write_points(CURRENT_TEST_POINTS_DEFAULT);
-        nextion_1_current_test_p3_write_time(CURRENT_TEST_TIME_DEFAULT);
+        // current_test_reset_default_p1_p2_p3();
     }
 }
-static void test_save(int slot)
-{
-    // save on fs
-
-    // save on usb
-}
-
-esp_err_t test_init_if_available()
+esp_err_t test_init_available_slot()
 {
     esp_err_t err;
 
     // DELETE INCOMPLETED SETUPS
-    test_deinit_all_initialized();
+    test_deinit_all_slot_initialized();
 
     // GET FREE SLOT
     int slot;
@@ -1601,7 +2031,7 @@ esp_err_t test_init_if_available()
     _test_setup[slot]->start.condition = START_CONDITION_MAX;
     _test_setup[slot]->start.parameters.greater_than.sensor_index = SENSOR_1_INDEX;
     _test_setup[slot]->start.parameters.less_than.sensor_index = SENSOR_1_INDEX;
-    _test_setup[slot]->test_name = "";
+    memcpy(_test_setup[slot]->test_name, "NONAME", 7);
 
     // INITIALIZE DEFAULT PAGES
     _loggging_page = PAGE_NEW_TEST_P3_1;
@@ -1613,7 +2043,7 @@ esp_err_t test_init_if_available()
     if (_test_table[slot] == NULL)
     {
         ESP_LOGE(TAG, "%s, line: %d", __FILE__, __LINE__);
-        test_free_setup(_test_setup[slot]);
+        free_test_setup(_test_setup[slot]);
         return ESP_ERR_NO_MEM;
     }
 
@@ -1627,33 +2057,43 @@ esp_err_t test_init_if_available()
     _test_start_timestamp[slot] = 0;
     _test_stop_timestamp[slot] = 0;
 
-    // CREATE TEST TIMER IF NOT YET
-    if (_timer == NULL)
-        _timer = xTimerCreate("test_timer", pdMS_TO_TICKS(100), pdTRUE, NULL, test_timer);
-
-    if (_timer == NULL)
-    {
-        test_free_setup(_test_setup[slot]);
-        test_free_table(_test_table[slot]);
-        ESP_LOGE(TAG, "%s, line: %d", __FILE__, __LINE__);
-        return ESP_FAIL;
-    }
-
     // SET SLOT INITIALIZED
     _initialized_slot = slot;
 
     // SET OPERATOR STOP
     _operator_stop[slot] = false;
 
+    _initialized_slot = slot;
+    _test_status[_initialized_slot] = TEST_INITIALIZED;
+
     return ESP_OK;
 }
+void test_complete_initialized_slot(void)
+{
+    assert(_initialized_slot != CURRENT_TEST_NUM_MAX);
+    assert(_test_status[_initialized_slot] == TEST_INITIALIZED);
+
+    _test_setup_timestamp[_initialized_slot] = time_get_timestamp();
+    // lock test sensors
+    test_lock_sensors(_initialized_slot);
+
+    // change status of initialized test to configured test
+    // and set it as foreground
+    _test_status[_initialized_slot] = TEST_CONFIGURED;
+    _foreground_slot = _initialized_slot;
+    _initialized_slot = CURRENT_TEST_NUM_MAX;
+
+    // plot new foreground slot
+    current_test_load_foreground_slot();
+}
+
 void test_run_slot(int slot)
 {
     // END EXECUTION IF TEST NOT CONFIGURED
-    bool test_is_unconfigured = ((_test_status[slot] == TEST_VOID) || (_test_status[slot] == TEST_INITIALIZED));
+    bool test_is_unconfigured = ((_test_status[slot] <= TEST_INITIALIZED));
     if (test_is_unconfigured)
     {
-        ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
+        // ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
         return;
     }
 
@@ -1665,22 +2105,36 @@ void test_run_slot(int slot)
         {
         case START_CONDITION_TRIGGER_IMMEDIATELY:
             if (test_start_condition_trigger_immediately(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case START_CONDITION_TIME_DELAY:
             if (test_start_condition_time_delay(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case START_CONDITION_GREATER_THAN:
             if (test_start_condition_greater_than(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case START_CONDITION_LESS_THAN:
             if (test_start_condition_less_than(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
+            break;
         default:
             ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
-            goto deinit_configured;
+            test_force_stop(slot);
+            goto end;
         }
         return;
     }
@@ -1694,23 +2148,36 @@ void test_run_slot(int slot)
         {
         case LOGGING_CONDITION_INTERVAL_LOGGING:
             if (test_logging_condition_interval_logging(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case LOGGING_CONDITION_LINEAR_TIME_INTERVAL:
             if (test_logging_condition_linear_time_interval(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case LOGGING_CONDITION_INTERVAL_LOGGING_TABLE:
             if (test_logging_condition_interval_logging_table(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case LOGGING_CONDITION_ELAPSED_TIME_TABLE:
             if (test_logging_condition_elapsed_time_table(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         default:
             ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
-            goto deinit_configured;
+            test_force_stop(slot);
+            goto end;
         }
 
         // STOP
@@ -1727,40 +2194,57 @@ void test_run_slot(int slot)
             break;
         case STOP_CONDITION_DISTANCE_UP:
             if (test_stop_condition_distance_up(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case STOP_CONDITION_DISTANCE_DOWN:
             if (test_stop_condition_distance_down(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case STOP_CONDITION_PERCENT_DROP:
             if (test_stop_condition_percent_drop(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case STOP_CONDITION_PERCENT_STRAIN:
             if (test_stop_condition_percent_strain(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case STOP_CONDITION_PERCENT_STRESS_DROP:
             if (test_stop_condition_percent_stress_drop(slot) != ESP_OK)
-                goto deinit_configured;
+            {
+                test_force_stop(slot);
+                goto end;
+            }
             break;
         case STOP_CONDITION_OPERATOR_STOP:
             test_stop_condition_operator_stop(slot);
             break;
         default:
             ESP_LOGE(TAG, "%s: line %d", __FILE__, __LINE__);
-            goto deinit_configured;
+            test_force_stop(slot);
+            goto end;
         }
         return;
     }
 
+end:
     // TEST STATUS : DONE
-    test_save(slot);
+    test_save_on_external_usb(slot);
+    test_save_on_internal_filesystem(slot);
 
-deinit_configured:
     ESP_LOGW(TAG, "%s: line %d", __FILE__, __LINE__);
-    test_deinit_configured(slot);
+    test_deinit_slot_configured(slot);
 }
 void test_run_all(void)
 {

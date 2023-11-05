@@ -5,7 +5,7 @@
 #include "string.h"
 
 sensor_dev_t sensor[NUM_SENSORS];
-char buffer[100] = {0};
+static char buffer[100] = {0};
 
 void sensor_init(int index)
 {
@@ -132,17 +132,34 @@ bool sensor_is_ready(int index)
     {
         bool is_enabled = sensor_is_enabled(index);
         bool is_calibrated = sensor_is_calibrated(index);
-        return is_enabled && is_calibrated;
+        bool is_free = sensor_is_free(index);
+        return is_enabled && is_calibrated && is_free;
     }
     else
     {
         bool is_enabled = sensor_is_enabled(index);
-        return is_enabled;
+        bool is_free = sensor_is_free(index);
+        return is_enabled && is_free;
     }
 }
 bool sensor_is_free(int index)
 {
     return sensor[index].is_free;
+}
+void sensor_set_as_busy(int index)
+{
+    sensor[index].is_free = false;
+}
+void sensor_set_as_free(int index)
+{
+    sensor[index].is_free = true;
+}
+char *sensor_get_status_str(int index)
+{
+    if (sensor[index].is_free == true)
+        return "FREE";
+    else
+        return "BUSY";
 }
 void sensor_set_calibration(int index, sensor_calib_t *calib)
 {

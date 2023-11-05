@@ -26,6 +26,7 @@ typedef enum
     NEXTION_STARTUP_ID = 0x00,
     SERIAL_BUFFER_OVERFLOW_ID = 0x24,
     TOUCH_EVENT_ID = 0x65,
+    NUMERIC_DATA_ID = 0x71,
     CUSTOM_EVENT_ID = 0X72,
     CMD_ID_MAX = 0XFF,
 } nextion_cmd_id_t;
@@ -35,6 +36,8 @@ typedef enum
     NEXTION_STARTUP_LEN = 6,
     SERIAL_BUFFER_OVERFLOW_LEN = 4,
     TOUCH_EVENT_LEN = 7,
+    NUMERIC_DATA_LEN = 8,
+    CUSTOM_EVENT_MIN_LEN = 6,
     CMD_LEN_MAX = 0XFF,
 } nextion_cmd_len_t;
 
@@ -50,6 +53,10 @@ typedef struct
             uint8_t component_id;
             uint8_t event;
         } touch_event;
+        struct
+        {
+            int32_t data;
+        } numeric_data;
         struct
         {
             uint8_t page;
@@ -85,7 +92,8 @@ nextion_res_t nextion_set_path_from_objName(nextion_t *dev, char *pageName, char
 nextion_res_t nextion_set_pco_from_objName(nextion_t *dev, char *pageName, char *objName, uint32_t content);
 nextion_res_t nextion_set_val_from_objName(nextion_t *dev, char *pageName, char *objName, int32_t content);
 nextion_res_t nextion_set_txt_from_objName(nextion_t *dev, char *pageName, char *objName, char *content);
-nextion_res_t nextion_set_en_from_objName_local(nextion_t *dev, char *objName, bool content)
+nextion_res_t nextion_set_txt_from_objName_local(nextion_t *dev, char *objName, char *content);
+nextion_res_t nextion_set_en_from_objName_local(nextion_t *dev, char *objName, bool content);
 
 nextion_res_t nextion_set_path_from_objId(nextion_t *dev, int pageIndex, int objId, char *content);
 nextion_res_t nextion_set_pco_from_objId(nextion_t *dev, int pageIndex, int objId, uint32_t content);
@@ -94,5 +102,7 @@ nextion_res_t nextion_set_txt_from_objId(nextion_t *dev, int pageIndex, int objI
 nextion_res_t nextion_append_txt_from_objId(nextion_t *dev, int pageIndex, int objId, char *content);
 nextion_res_t nextion_set_en_from_objId(nextion_t *dev, int pageIndex, int objId, bool en);
 
-nextion_res_t nextion_goto_page_from_pageIndex(nextion_t *dev, uint8_t pageIndex);
+nextion_res_t nextion_command_page_by_pageIndex(nextion_t *dev, uint8_t pageIndex);
 nextion_res_t nextion_add_single_value_to_waveform(nextion_t *dev, int objId, int channel, uint8_t content);
+nextion_res_t nextion_command_get_by_objId(nextion_t *dev, int pageIndex, int objId, char *attribute);
+nextion_res_t nextion_command_get_by_sysVar(nextion_t *dev, char *sysVar);
