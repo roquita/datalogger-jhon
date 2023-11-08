@@ -593,18 +593,24 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
             // LOADED
             if (component_id == 0x00)
                 SEND_EMPTY_MSG(main_queue, CURRENT_TEST_P1_LOADED, portMAX_DELAY)
+            else if (component_id == 10)
+                SEND_EMPTY_MSG(main_queue, CURRENT_TEST_OPERATOR_STOP, portMAX_DELAY)
         }
         else if (page == PAGE_CURRENT_TEST_P2)
         {
             //   LOADED
             if (component_id == 0x00)
                 SEND_EMPTY_MSG(main_queue, CURRENT_TEST_P2_LOADED, portMAX_DELAY)
+            else if (component_id == 7)
+                SEND_EMPTY_MSG(main_queue, CURRENT_TEST_OPERATOR_STOP, portMAX_DELAY)
         }
         else if (page == PAGE_CURRENT_TEST_P3)
         {
             // LOADED
             if (component_id == 0x00)
                 SEND_EMPTY_MSG(main_queue, CURRENT_TEST_P3_LOADED, portMAX_DELAY)
+            else if (component_id == 7)
+                SEND_EMPTY_MSG(main_queue, CURRENT_TEST_OPERATOR_STOP, portMAX_DELAY)
         }
 
         // UNKNOWN TOUCH EVENT
@@ -1484,11 +1490,11 @@ void nextion_1_current_test_p3_write_time(char *content)
 }
 
 // Y axis
-void nextion_1_current_test_p3_write_sensor_name(char *content)
+void nextion_1_current_test_p3_write_y_axis_name(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 86, content);
 }
-void nextion_1_current_test_p3_write_sensor_unit(char *content)
+void nextion_1_current_test_p3_write_y_axis_unit(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 17, content);
 }

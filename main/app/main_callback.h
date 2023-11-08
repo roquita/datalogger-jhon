@@ -114,6 +114,9 @@ void new_test_p7_3_trigger_input_received_cb(msg_t *msg);
 void new_test_p7_4_start_received_cb(msg_t *msg);
 void new_test_p7_4_trigger_input_received_cb(msg_t *msg);
 
+// CURRENT TEST
+void current_test_operator_stop_cb(msg_t *msg);
+
 // SENSOR UNIT CHANGED
 void sensor_unit_changed(msg_t *msg);
 
@@ -132,3 +135,7 @@ void periodic_1s_cb(msg_t *msg);
 void time_rtc_start_sync_cb(msg_t *msg);
 void time_rtc_data_received_cb(msg_t *msg);
 void time_datetime_print_cb(msg_t *msg);
+
+// USB
+void usb_connected_cb(msg_t *msg);
+void usb_disconnected_cb(msg_t *msg);

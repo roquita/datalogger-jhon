@@ -237,6 +237,10 @@ void main_task(void *arg)
                 new_test_p7_4_trigger_input_received_cb(&msg);
         }
 
+        // CURRENT TEST
+        else if(type == CURRENT_TEST_OPERATOR_STOP)
+            current_test_operator_stop_cb(&msg);
+
         // SENSOR UNIT CHANGED
         else if (type == SENSOR_UNIT_CHANGED)
             sensor_unit_changed(&msg);
@@ -265,6 +269,11 @@ void main_task(void *arg)
         else if (type == TIME_DATETIME_PRINT)
             time_datetime_print_cb(&msg);
 
+        // USB
+        else if ( type == USB_CONNECTED)
+            usb_connected_cb(&msg);
+        else if ( type == USB_DISCONNECTED)
+            usb_disconnected_cb(&msg);
         else
         {
             ESP_LOGE(TAG, "file:%s,line:%u", __FILE__, __LINE__);

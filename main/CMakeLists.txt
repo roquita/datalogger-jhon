@@ -12,3 +12,9 @@ idf_component_register(SRCS ${C_SOURCES}  ${CPP_SOURCES}
                      "app/configuration" 
                      "app/time"
                    )
+
+
+# Nedded to avoid the formating of partition STORAGE
+set(image ../fatfs_image)
+#fatfs_create_spiflash_image(storage ${image} FLASH_IN_PROJECT)
+

@@ -44,7 +44,6 @@ static void main_timer_callback(TimerHandle_t xTimer)
 void main_task_init()
 {
     main_timer = xTimerCreate("main timer", pdMS_TO_TICKS(100), pdTRUE, NULL, main_timer_callback);
-    
 
     // SYNC TIME
     vTaskDelay(pdMS_TO_TICKS(3000));
@@ -73,7 +72,8 @@ void main_task_init()
     /********************************************************************/
 
     // TEST ( use fatfs and usb )
-    test_init_storage();
+    test_init_filesystem();
+    test_init_usb();
 
     /************************** INTRO LOADING  **************************/
     nextion_1_intro_write_loading(80);
@@ -2434,6 +2434,22 @@ end:
     if (size_received > 0)
         free(msg->content.addr);
 }
+
+/*
+ ██████╗██╗   ██╗██████╗ ██████╗ ███████╗███╗   ██╗████████╗    ████████╗███████╗███████╗████████╗
+██╔════╝██║   ██║██╔══██╗██╔══██╗██╔════╝████╗  ██║╚══██╔══╝    ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝
+██║     ██║   ██║██████╔╝██████╔╝█████╗  ██╔██╗ ██║   ██║          ██║   █████╗  ███████╗   ██║
+██║     ██║   ██║██╔══██╗██╔══██╗██╔══╝  ██║╚██╗██║   ██║          ██║   ██╔══╝  ╚════██║   ██║
+╚██████╗╚██████╔╝██║  ██║██║  ██║███████╗██║ ╚████║   ██║          ██║   ███████╗███████║   ██║
+ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═══╝   ╚═╝          ╚═╝   ╚══════╝╚══════╝   ╚═╝
+
+*/
+
+void current_test_operator_stop_cb(msg_t *msg)
+{
+    test_set_operator_stop();
+}
+
 /*
     ███████╗███████╗███╗   ██╗███████╗ ██████╗ ██████╗     ██╗   ██╗███╗   ██╗██╗████████╗     ██████╗██╗  ██╗ █████╗ ███╗   ██╗ ██████╗ ███████╗██████╗
     ██╔════╝██╔════╝████╗  ██║██╔════╝██╔═══██╗██╔══██╗    ██║   ██║████╗  ██║██║╚══██╔══╝    ██╔════╝██║  ██║██╔══██╗████╗  ██║██╔════╝ ██╔════╝██╔══██╗
@@ -2687,4 +2703,23 @@ void time_rtc_data_received_cb(msg_t *msg)
 void time_datetime_print_cb(msg_t *msg)
 {
     nextion_1_set_datetime(time_get_datetime_formated(false, 0));
+}
+
+/*
+██╗   ██╗███████╗██████╗
+██║   ██║██╔════╝██╔══██╗
+██║   ██║███████╗██████╔╝
+██║   ██║╚════██║██╔══██╗
+╚██████╔╝███████║██████╔╝
+ ╚═════╝ ╚══════╝╚═════╝
+
+*/
+
+void usb_connected_cb(msg_t *msg)
+{
+    usb_device_connected(msg->content.i32);
+}
+void usb_disconnected_cb(msg_t *msg)
+{
+    usb_device_disconnected();
 }

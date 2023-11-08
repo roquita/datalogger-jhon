@@ -37,7 +37,7 @@ static void time_timer_callback(TimerHandle_t xTimer)
 void time_init_timer()
 {
     assert(_timer == NULL);
-    _timer = xTimerCreate("test_timer", pdMS_TO_TICKS(60*1000), pdTRUE, NULL, time_timer_callback);
+    _timer = xTimerCreate("test_timer", pdMS_TO_TICKS(60 * 1000), pdTRUE, NULL, time_timer_callback);
     xTimerStart(_timer, portMAX_DELAY);
 }
 
@@ -118,7 +118,7 @@ double time_get_ftimestamp()
 char *time_get_datetime_formated(bool from_arg, int64_t fixed_timestamp)
 {
     time_t timestamp;
-    
+
     if (from_arg)
         timestamp = fixed_timestamp;
     else
@@ -126,15 +126,31 @@ char *time_get_datetime_formated(bool from_arg, int64_t fixed_timestamp)
 
     struct tm *datetime = gmtime(&timestamp);
 
-    snprintf(buffer, sizeof(buffer), "%02i / %02i / %i - %02i : %02i %s",
+    snprintf(buffer, sizeof(buffer), "%02i/%02i/%i - %02i:%02i:%02i %s",
              (_dateformat == DATEFORMAT_MM_DD_YYYY) ? datetime->tm_mon : datetime->tm_mday,
              (_dateformat == DATEFORMAT_MM_DD_YYYY) ? datetime->tm_mday : datetime->tm_mon,
              datetime->tm_year,
              (_timeformat == TIMEFORMAT_24H) ? datetime->tm_hour : ((datetime->tm_hour) % 12),
              datetime->tm_min,
+             datetime->tm_sec,
              (_timeformat == TIMEFORMAT_24H) ? "" : ((datetime->tm_hour >= 12) ? "PM" : "AM"));
 
     return buffer;
+}
+
+char *time_get_date_format_str()
+{
+    if (_dateformat == DATEFORMAT_MM_DD_YYYY)
+        return "MM/DD/YYYY";
+    else
+        return "DD/MM/YYYY";
+}
+char *time_get_time_format_str()
+{
+    if (_timeformat == TIMEFORMAT_AM_PM)
+        return "AM/PM";
+    else
+        return "24H";
 }
 
 /*

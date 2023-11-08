@@ -358,8 +358,8 @@ void nextion_1_current_test_p3_write_points(int content);
 void nextion_1_current_test_p3_write_time(char *content);
 
 // Y axis
-void nextion_1_current_test_p3_write_sensor_name(char *content);
-void nextion_1_current_test_p3_write_sensor_unit(char *content);
+void nextion_1_current_test_p3_write_y_axis_name(char *content);
+void nextion_1_current_test_p3_write_y_axis_unit(char *content);
 void nextion_1_current_test_p3_write_Y1(char *content);
 void nextion_1_current_test_p3_write_Y2(char *content);
 void nextion_1_current_test_p3_write_Y3(char *content);

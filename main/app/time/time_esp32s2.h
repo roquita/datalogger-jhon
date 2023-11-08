@@ -35,3 +35,5 @@ void time_set_rtc_data_1by1(int32_t data);
 int64_t time_get_timestamp();
 double time_get_ftimestamp();
 char *time_get_datetime_formated(bool from_arg, int64_t fixed_timestamp);
+char *time_get_date_format_str();
+char *time_get_time_format_str();

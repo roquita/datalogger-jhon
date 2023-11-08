@@ -86,6 +86,7 @@ typedef enum
     TEST_VOID = 0,
     TEST_INITIALIZED,
     TEST_CONFIGURED,
+    TEST_TRIGGERING,
     TEST_RUNNING,
     TEST_DONE,
 } test_status_t;
@@ -123,6 +124,7 @@ typedef struct
         uint8_t byte;
     } tara_enable;
     int sensor_num;
+
 } test_inputs_t;
 
 typedef struct
@@ -266,20 +268,38 @@ typedef struct
 
 typedef struct
 {
-    int index;
-    test_time_t time;
-    double *data;
-    void *next;
-} test_row_t;
+    char title[TEST_TITLE_LEN_MAX + 1]; // +1 for null end
+    char sensor_name[NUM_SENSORS][CALIB_NAME_LEN_MAX + 1];
+    char sensor_unit[NUM_SENSORS][SENSOR_UNIT_LEN_MAX + 1];
+    char sensor_unitps[NUM_SENSORS][SENSOR_UNITPS_LEN_MAX + 1];
+    int sensor_num_decimals[NUM_SENSORS];
+    char Y_axis_name[CALIB_NAME_LEN_MAX + 1];
+    char Y_axis_unit[SENSOR_UNIT_LEN_MAX + 1];
+    char Y1_val[SENSOR_READING_LEN_MAX + 1];
+    char Y2_val[SENSOR_READING_LEN_MAX + 1];
+    char Y3_val[SENSOR_READING_LEN_MAX + 1];
+    char Y4_val[SENSOR_READING_LEN_MAX + 1];
+    char Y5_val[SENSOR_READING_LEN_MAX + 1];
+    char Y6_val[SENSOR_READING_LEN_MAX + 1];
+    char Y7_val[SENSOR_READING_LEN_MAX + 1];
+    char Y8_val[SENSOR_READING_LEN_MAX + 1];
+} test_aditional_info_t;
+
 typedef struct
 {
-    test_row_t *first_row;
-    test_row_t *last_row;
+    int index;
+    test_time_t time;
+    double data[NUM_SENSORS];
+} test_row_t;
+
+typedef struct
+{
+    test_row_t row[TEST_ROWS_NUM_MAX];
     int row_num;
-    double *peak_values;
+    double peak_values[NUM_SENSORS];
 } test_table_t;
 
-
+void test_set_operator_stop();
 int test_get_tara_enable();
 void test_print_elapsed_time();
 
@@ -422,9 +442,12 @@ esp_err_t test_logging_condition_elapsed_time_table(int slot);
 ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝
 
 */
-void test_init_storage(void);
-void test_save_on_external_usb(int slot);
-void test_save_on_internal_filesystem(int slot);
+void test_init_filesystem(void);
+void test_init_usb(void);
+void test_save_on_usb(int slot);
+void test_save_on_filesystem(int slot);
+void usb_device_connected(int device_address);
+void usb_device_disconnected();
 
 /*
 ███████╗██╗      ██████╗ ████████╗
