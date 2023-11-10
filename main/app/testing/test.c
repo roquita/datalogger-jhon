@@ -56,6 +56,8 @@ static char buffer[60];
 static char csv[5000];
 static int csv_size;
 
+extern bool periodic_100ms_enabled;
+
 void test_set_operator_stop()
 {
     if (_foreground_slot == CURRENT_TEST_NUM_MAX)
@@ -157,13 +159,15 @@ static char *test_get_status_str(int slot)
     case TEST_INITIALIZED:
         return "ERROR 2";
     case TEST_CONFIGURED:
-        return "NO TRIGGER";
+        return "ERROR 3";
+    case TEST_TRIGGERING:
+        return "TRIGGERING";
     case TEST_RUNNING:
         return "RUNNING";
     case TEST_DONE:
         return "DONE";
     default:
-        return "ERROR 3";
+        return "ERROR 4";
     }
 }
 static void test_lock_sensors(int slot)
@@ -1861,11 +1865,11 @@ void test_init_filesystem(void)
            tot_sect * CONFIG_WL_SECTOR_SIZE, fre_sect * CONFIG_WL_SECTOR_SIZE);
 }
 
-msc_host_device_handle_t msc_device;
-msc_host_vfs_handle_t vfs_handle;
+msc_host_device_handle_t msc_device = NULL;
+msc_host_vfs_handle_t vfs_handle = NULL;
 msc_host_device_info_t info;
 BaseType_t task_created;
-bool device_connected_ok = false;
+
 static void msc_event_cb(const msc_host_event_t *event, void *arg)
 {
     if (event->event == MSC_DEVICE_CONNECTED)
@@ -1896,12 +1900,6 @@ static void print_device_info(msc_host_device_info_t *info)
 }
 void usb_device_connected(int device_address)
 {
-    if (device_connected_ok == true)
-    {
-        ESP_LOGW(TAG, "%s, line:%d", __FILE__, __LINE__);
-        return;
-    }
-
     const esp_vfs_fat_mount_config_t mount_config = {
         .format_if_mount_failed = false,
         .max_files = 3,
@@ -1911,7 +1909,12 @@ void usb_device_connected(int device_address)
     if (msc_host_install_device(device_address, &msc_device) != ESP_OK)
     {
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
-        device_connected_ok = false;
+        /*********** nextion msg **************/
+        nextion_1_message_write_content("\r\nERROR:\r\nCANT INSTALL USB DEVICE\r\n");
+        nextion_1_message_write_nextpage(nextion_1_get_page());
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+        /**************************************/
         return;
     }
 
@@ -1920,7 +1923,14 @@ void usb_device_connected(int device_address)
     if (msc_host_get_device_info(msc_device, &info) != ESP_OK)
     {
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
-        device_connected_ok = false;
+        msc_host_uninstall_device(msc_device);
+        msc_device = NULL;
+        /*********** nextion msg **************/
+        nextion_1_message_write_content("\r\nERROR:\r\nCANT GET USB INFO\r\n");
+        nextion_1_message_write_nextpage(nextion_1_get_page());
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+        /**************************************/
         return;
     }
 
@@ -1929,25 +1939,45 @@ void usb_device_connected(int device_address)
     if (msc_host_vfs_register(msc_device, "/usb", &mount_config, &vfs_handle) != ESP_OK)
     {
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
-        device_connected_ok = false;
+        msc_host_uninstall_device(msc_device);
+        msc_device = NULL;
+        /*********** nextion msg **************/
+        nextion_1_message_write_content("\r\nERROR:\r\nCANT MANAGE USB CONTENT\r\n");
+        nextion_1_message_write_nextpage(nextion_1_get_page());
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+        /**************************************/
         return;
     }
 
+    /*********** nextion msg **************/
+    nextion_1_message_write_content("\r\nSUCCESS:\r\nUSB CONNECTED\r\n");
+    nextion_1_message_write_nextpage(nextion_1_get_page());
+    nextion_1_message_write_content_color(NEXTION_COLOR_GREEN);
+    nextion_1_goto_page(PAGE_MESSAGE);
+    /**************************************/
     ESP_LOGI(TAG, "%s, line:%d", __FILE__, __LINE__);
-    device_connected_ok = true;
 }
 void usb_device_disconnected()
 {
-    if (device_connected_ok == false)
+    if (vfs_handle)
     {
-        ESP_LOGW(TAG, "%s, line:%d", __FILE__, __LINE__);
-        return;
+        msc_host_vfs_unregister(vfs_handle);
+        vfs_handle = NULL;
     }
 
-    msc_host_vfs_unregister(vfs_handle);
-    msc_host_uninstall_device(msc_device);
+    if (msc_device)
+    {
+        msc_host_uninstall_device(msc_device);
+        msc_device = NULL;
+    }
 
-    device_connected_ok = false;
+    /*********** nextion msg **************/
+    nextion_1_message_write_content("\r\nSUCCESS:\r\nUSB DISCONNECTED\r\n");
+    nextion_1_message_write_nextpage(nextion_1_get_page());
+    nextion_1_message_write_content_color(NEXTION_COLOR_GREEN);
+    nextion_1_goto_page(PAGE_MESSAGE);
+    /**************************************/
 }
 // Handles common USB host library events
 static void handle_usb_events(void *args)
@@ -1984,7 +2014,7 @@ void test_init_usb(void)
     // install msc host
     const msc_host_driver_config_t msc_config = {
         .create_backround_task = true,
-        .task_priority = 5,
+        .task_priority = 3,
         .stack_size = 2048,
         .callback = msc_event_cb,
     };
@@ -1993,12 +2023,6 @@ void test_init_usb(void)
 void test_save_on_usb(int slot)
 {
     assert(_test_status[slot] == TEST_DONE);
-
-    if (device_connected_ok == false)
-    {
-        ESP_LOGW(TAG, "%s, line:%d", __FILE__, __LINE__);
-        return;
-    }
 
     //  global var
     test_setup_t *test_setup = _test_setup + slot;
@@ -2030,6 +2054,11 @@ void test_save_on_usb(int slot)
     if (f == NULL)
     {
         ESP_LOGE(TAG, "%s, line:%d, Err: %d", __FILE__, __LINE__, errno);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nUSB ERROR(1) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
@@ -2040,10 +2069,19 @@ void test_save_on_usb(int slot)
         fclose(f);
         remove(buffer);
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nUSB ERROR(2) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
     ESP_LOGI(TAG, "test_save_on_usb : OK");
+    /*********** nextion msg **************/
+    nextion_1_message_append_content("\r\nUSB SUCCESS SAVING TEST.\r\nFILE: ");
+    nextion_1_message_append_content(buffer);
+    /**************************************/
     fclose(f);
 }
 void test_save_on_filesystem(int slot)
@@ -2056,6 +2094,7 @@ void test_save_on_filesystem(int slot)
     test_aditional_info_t *aditional_info = _test_aditional_info + slot;
 
     // check available space in fatfs
+    /*
     FATFS *fs;
     DWORD fre_clust, fre_sect, tot_sect;
     FRESULT res = f_getfree(FATFS_DISK_INDEX, &fre_clust, &fs);
@@ -2065,8 +2104,15 @@ void test_save_on_filesystem(int slot)
     if (bytes_free < TEST_FS_SLOT_SIZE_MIN)
     {
         ESP_LOGW(TAG, "%s, line:%d", __FILE__, __LINE__);
+        //////////// nextion msg /////////////////
+        nextion_1_message_write_content("\r\nERROR:\r\nNOT ENOUGH INTERNAL MEMORY TO\r\nSAVE NEW FILE");
+        nextion_1_message_write_nextpage(nextion_1_get_page());
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        nextion_1_goto_page(PAGE_MESSAGE);
+        //////////////////////////////////////////
         return;
     }
+    */
 
     // get available name
     snprintf(buffer, sizeof(buffer), "%s/%s.%s", FATFS_BASE_PATH, test_setup->test_name, FATFS_FILETYPE_TEST);
@@ -2089,12 +2135,18 @@ void test_save_on_filesystem(int slot)
     ESP_LOGI(TAG, "filename(spiflash): %s", buffer);
 
     // save on internal filesystem
+
     // open
     FILE *f;
     f = fopen(buffer, "ab");
     if (f == NULL)
     {
         ESP_LOGE(TAG, "%s, line:%d, Err: %d", __FILE__, __LINE__, errno);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nMEMORY ERROR(1) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
@@ -2105,6 +2157,11 @@ void test_save_on_filesystem(int slot)
         fclose(f);
         remove(buffer);
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nMEMORY ERROR(2) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
@@ -2115,6 +2172,11 @@ void test_save_on_filesystem(int slot)
         fclose(f);
         remove(buffer);
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nMEMORY ERROR(3) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
@@ -2125,6 +2187,11 @@ void test_save_on_filesystem(int slot)
         fclose(f);
         remove(buffer);
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nMEMORY ERROR(4) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
@@ -2135,11 +2202,21 @@ void test_save_on_filesystem(int slot)
         fclose(f);
         remove(buffer);
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
+        /*********** nextion msg **************/
+        nextion_1_message_append_content("\r\nMEMORY ERROR(5) SAVING TEST.\r\nFILE: ");
+        nextion_1_message_append_content(buffer);
+        nextion_1_message_write_content_color(NEXTION_COLOR_RED);
+        /**************************************/
         return;
     }
 
     ESP_LOGI(TAG, "test_save_on_filesystem : OK");
     fclose(f);
+
+    /*********** nextion msg **************/
+    nextion_1_message_append_content("\r\nMEMORY SUCCESS SAVING TEST.\r\nFILE: ");
+    nextion_1_message_append_content(buffer);
+    /**************************************/
 
     // IMPRIMIR CONTENIDO
     /*
@@ -2160,6 +2237,28 @@ void test_save_on_filesystem(int slot)
         ESP_LOGE(TAG, "%s, line:%d", __FILE__, __LINE__);
     }
     */
+}
+void test_save(int slot)
+{
+    assert(_test_status[slot] == TEST_DONE);
+
+    /*********** nextion msg **************/
+    nextion_1_message_write_content("");
+    nextion_1_message_write_content_color(NEXTION_COLOR_GREEN);
+    /**************************************/
+
+    test_save_on_usb(slot);
+
+    /*********** nextion msg **************/
+    nextion_1_message_append_content("\r\n\r\n");
+    /**************************************/
+
+    test_save_on_filesystem(slot);
+
+    /*********** nextion msg **************/
+    nextion_1_message_write_nextpage(nextion_1_get_page());
+    nextion_1_goto_page(PAGE_MESSAGE);
+    /**************************************/
 }
 
 /*
@@ -2221,6 +2320,13 @@ void test_deinit_slot_configured(int slot)
     {
         _foreground_slot = CURRENT_TEST_NUM_MAX;
         // current_test_reset_default_p1_p2_p3();
+    }
+
+    // disabled timer if no test is running
+    if (test_is_an_slot_in_execution() != ESP_OK)
+    {
+        ESP_LOGW(TAG, "%s, line:%d", __FILE__, __LINE__);
+        periodic_100ms_enabled = false;
     }
 }
 esp_err_t test_init_available_slot()
@@ -2302,6 +2408,9 @@ void test_complete_initialized_slot(void)
 
     // plot new foreground slot
     current_test_load_foreground_slot();
+
+    // enable timer
+    periodic_100ms_enabled = true;
 }
 
 void test_run_slot(int slot)
@@ -2393,8 +2502,7 @@ void test_run_slot(int slot)
 
     // TEST STATUS : DONE
     test_generate_csv(slot);
-    test_save_on_usb(slot);
-    test_save_on_filesystem(slot);
+    test_save(slot);
 
     ESP_LOGW(TAG, "%s: line %d", __FILE__, __LINE__);
     test_deinit_slot_configured(slot);

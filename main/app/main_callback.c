@@ -21,12 +21,23 @@
 TimerHandle_t main_timer = NULL;
 
 int counter = 0;
+bool periodic_100ms_enabled = false;
+bool periodic_300ms_enabled = false;
 static void main_timer_callback(TimerHandle_t xTimer)
 {
     SEND_EMPTY_MSG(main_queue, PERIODIC_100MS, portMAX_DELAY);
 
+    if (periodic_300ms_enabled && ((counter % 3) == 0))
+        SEND_EMPTY_MSG(main_queue, PERIODIC_300MS, portMAX_DELAY);
+
     if ((counter % 10) == 0)
         SEND_EMPTY_MSG(main_queue, PERIODIC_1S, portMAX_DELAY);
+
+    if ((counter % 600) == 0)
+        SEND_EMPTY_MSG(main_queue, PERIODIC_1MIN, portMAX_DELAY);
+
+    if ((counter % 6000) == 0)
+        SEND_EMPTY_MSG(main_queue, PERIODIC_10MIN, portMAX_DELAY);
 
     counter++;
 }
@@ -43,23 +54,22 @@ static void main_timer_callback(TimerHandle_t xTimer)
 
 void main_task_init()
 {
-    main_timer = xTimerCreate("main timer", pdMS_TO_TICKS(100), pdTRUE, NULL, main_timer_callback);
-
     // SYNC TIME
-    vTaskDelay(pdMS_TO_TICKS(3000));
+    vTaskDelay(pdMS_TO_TICKS(1500));
 
     // NEXTION IN
     nextion_1_init_hardware();
-    nextion_1_init_timer();
+
+    /************************** INTRO LOADING  **************************/
+    nextion_1_intro_write_loading(0);
+    nextion_1_goto_page(NEXTION_PRE_INIT_PAGE);
+    vTaskDelay(pdMS_TO_TICKS(1500));
+    /********************************************************************/
 
     /************************** INTRO LOADING  **************************/
     nextion_1_intro_write_loading(10);
     vTaskDelay(pdMS_TO_TICKS(100));
     /********************************************************************/
-
-    // TIME
-    time_init_timer();
-    time_rtc_start_sync();
 
     /************************** INTRO LOADING  **************************/
     nextion_1_intro_write_loading(20);
@@ -71,7 +81,7 @@ void main_task_init()
     vTaskDelay(pdMS_TO_TICKS(100));
     /********************************************************************/
 
-    // TEST ( use fatfs and usb )
+    // TEST
     test_init_filesystem();
     test_init_usb();
 
@@ -139,6 +149,8 @@ void main_task_init()
     // NEXTION OUT
     nextion_1_goto_page(NEXTION_POST_INIT_PAGE);
 
+    // MAIN TIMER
+    main_timer = xTimerCreate("main timer", pdMS_TO_TICKS(100), pdTRUE, NULL, main_timer_callback);
     xTimerStart(main_timer, portMAX_DELAY);
 }
 
@@ -154,264 +166,273 @@ void main_task_init()
 
 void home_loaded_cb(msg_t *msg)
 {
-    // ESP_LOGI(TAG, "%s", __func__);
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_HOME);
-    nextion_1_start_timer();
+    periodic_300ms_enabled = true;
 }
 void system_settings_loaded_cb(msg_t *msg)
 {
-    // ESP_LOGI(TAG, "%s", __func__);
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_SYSTEM_SETTINGS);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void calibration_loaded_cb(msg_t *msg)
 {
-    // ESP_LOGI(TAG, "%s", __func__);
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_CALIBRATION);
-    nextion_1_start_timer();
+    periodic_300ms_enabled = true;
 }
 void inputcalibp1_loaded_cb(msg_t *msg)
 {
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_INPUTCALIBP1);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void inputcalibp2_loaded_cb(msg_t *msg)
 {
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_INPUTCALIBP2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void inputcalibp3_loaded_cb(msg_t *msg)
 {
-    // ESP_LOGI(TAG, "%s", __func__);
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_INPUTCALIBP3);
-    nextion_1_start_timer();
+    periodic_300ms_enabled = true;
 }
 void inputcalibp4_loaded_cb(msg_t *msg)
 {
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_INPUTCALIBP4);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
-void keybda_loaded_cb(msg_t *msg) {}
+void keybda_loaded_cb(msg_t *msg)
+{
+    ESP_LOGI(TAG, "%s", __func__);
+}
 void numpad_popup_loaded_cb(msg_t *msg)
 {
+    ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NUMPAD_POPUP);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
-void intro_loaded_cb(msg_t *msg) {}
+void intro_loaded_cb(msg_t *msg) {
+    ESP_LOGI(TAG, "%s", __func__);
+}
 void inputconfigp1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(INPUTCONFIGP1_LOADED);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void new_test_p1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P1);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void new_test_p2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void new_test_p3_1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_1);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_logging_page(PAGE_NEW_TEST_P3_1);
 }
 void new_test_p3_2_loadedcb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_logging_page(PAGE_NEW_TEST_P3_2);
 }
 void new_test_p3_3_loadedcb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_3);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_logging_page(PAGE_NEW_TEST_P3_3);
 }
 void new_test_p3_4_loadedcb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P3_4);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_logging_page(PAGE_NEW_TEST_P3_4);
 }
 void log_sensor_table_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_LOG_SENSOR_TABLE);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void log_time_table_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_LOG_TIME_TABLE);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void new_test_p4_1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_1);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_1);
 }
 void new_test_p4_2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_2);
 }
 void new_test_p4_3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_3);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_3);
 }
 void new_test_p4_4_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_4);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_4);
 }
 void new_test_p4_5_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_5);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_5);
 }
 void new_test_p4_6_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_6);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_6);
 }
 void new_test_p4_7_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_7);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_7);
 }
 void new_test_p4_8_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_8);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_8);
 }
 void new_test_p4_9_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P4_9);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_stop_page(PAGE_NEW_TEST_P4_9);
 }
 void new_test_p5_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P5);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void new_test_p6_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P6);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void new_test_p7_1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_1);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_start_page(PAGE_NEW_TEST_P7_1);
 }
 void new_test_p7_2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
     test_set_start_page(PAGE_NEW_TEST_P7_2);
 }
 void new_test_p7_3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_3);
-    nextion_1_start_timer();
+    periodic_300ms_enabled = true;
     test_set_start_page(PAGE_NEW_TEST_P7_3);
 }
 void new_test_p7_4_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_NEW_TEST_P7_4);
-    nextion_1_start_timer();
+    periodic_300ms_enabled = true;
     test_set_start_page(PAGE_NEW_TEST_P7_4);
 }
 void previous_test_p1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_PREVIOUS_TEST_P1);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void previous_test_p2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_PREVIOUS_TEST_P2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void previous_test_p3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_PREVIOUS_TEST_P3);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void export_test_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_EXPORT_TEST);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void delete_test_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_DELETE_TEST);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void message_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
-    nextion_1_set_page(PAGE_MESSAGE);
-    nextion_1_stop_timer();
+    // nextion_1_set_page(PAGE_MESSAGE);
+    periodic_300ms_enabled = false;
 }
 void current_test_p1_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_CURRENT_TEST_P1);
-    nextion_1_start_timer();
+    periodic_300ms_enabled = true;
 }
 void current_test_p2_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_CURRENT_TEST_P2);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 void current_test_p3_loaded_cb(msg_t *msg)
 {
     ESP_LOGI(TAG, "%s", __func__);
     nextion_1_set_page(PAGE_CURRENT_TEST_P3);
-    nextion_1_stop_timer();
+    periodic_300ms_enabled = false;
 }
 
 /*
@@ -627,6 +648,7 @@ void datetime_rtc_all_at_once_received_cb(msg_t *msg)
     dateformat_t dateformat = (*(addr + 8) == 0) ? DATEFORMAT_MM_DD_YYYY : DATEFORMAT_DD_MM_YYYY;
 
     time_set_rtc_data_atOnce(&datetime, dateformat, timeformat);
+    nextion_1_set_datetime(time_get_datetime_formated(false, 0));
 
 end:
     if (size_received > 0)
@@ -1328,7 +1350,8 @@ void new_test_p3_3_logging_received_cb(msg_t *msg)
     {
         value[i] = atof((char *)addr + 2 + (i * 10));
 
-        if (value[i] < 0.0001)
+        bool zero_detected = value[i] < 0.0001;
+        if ((i != 0) && zero_detected)
         {
             size = i;
             break;
@@ -1413,7 +1436,7 @@ void new_test_p3_4_logging_received_cb(msg_t *msg)
         value[i].s = (float)atof(base + 6);
 
         bool zero_detected = ((value[i].h == 0) && (value[i].m == 0) && (value[i].s < 0.0001));
-        if (zero_detected)
+        if ((i != 0) && zero_detected)
         {
             size = i;
             break;
@@ -2533,18 +2556,20 @@ void sensor_class_received_cb(msg_t *msg)
 }
 
 /*
-███╗   ██╗███████╗██╗  ██╗████████╗██╗ ██████╗ ███╗   ██╗    ████████╗██╗███╗   ███╗███████╗██████╗
-████╗  ██║██╔════╝╚██╗██╔╝╚══██╔══╝██║██╔═══██╗████╗  ██║    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
-██╔██╗ ██║█████╗   ╚███╔╝    ██║   ██║██║   ██║██╔██╗ ██║       ██║   ██║██╔████╔██║█████╗  ██████╔╝
-██║╚██╗██║██╔══╝   ██╔██╗    ██║   ██║██║   ██║██║╚██╗██║       ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
-██║ ╚████║███████╗██╔╝ ██╗   ██║   ██║╚██████╔╝██║ ╚████║       ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
-╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝   ╚═╝   ╚═╝ ╚═════╝ ╚═╝  ╚═══╝       ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
+███╗   ███╗ █████╗ ██╗███╗   ██╗    ████████╗██╗███╗   ███╗███████╗██████╗
+████╗ ████║██╔══██╗██║████╗  ██║    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
+██╔████╔██║███████║██║██╔██╗ ██║       ██║   ██║██╔████╔██║█████╗  ██████╔╝
+██║╚██╔╝██║██╔══██║██║██║╚██╗██║       ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
+██║ ╚═╝ ██║██║  ██║██║██║ ╚████║       ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
+╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝       ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
 
 */
-
-void nextion_update_cb(msg_t *msg)
+void periodic_100ms_cb(msg_t *msg)
 {
-
+    test_run_all();
+}
+void periodic_300ms_cb(msg_t *msg)
+{
     // ESP_LOGI(TAG, "%s", __func__);
     page_t page = nextion_1_get_page();
     if (page == PAGE_HOME)
@@ -2656,36 +2681,15 @@ void nextion_update_cb(msg_t *msg)
         // ESP_LOGW(TAG, "%s:line %d", __FILE__, __LINE__);
     }
 }
-
-/*
-███╗   ███╗ █████╗ ██╗███╗   ██╗    ████████╗██╗███╗   ███╗███████╗██████╗
-████╗ ████║██╔══██╗██║████╗  ██║    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
-██╔████╔██║███████║██║██╔██╗ ██║       ██║   ██║██╔████╔██║█████╗  ██████╔╝
-██║╚██╔╝██║██╔══██║██║██║╚██╗██║       ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
-██║ ╚═╝ ██║██║  ██║██║██║ ╚████║       ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
-╚═╝     ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝       ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
-
-*/
-void periodic_100ms_cb(msg_t *msg)
-{
-    test_run_all();
-}
 void periodic_1s_cb(msg_t *msg)
 {
     test_print_elapsed_time();
 }
-
-/*
-████████╗██╗███╗   ███╗███████╗    ████████╗██╗███╗   ███╗███████╗██████╗
-╚══██╔══╝██║████╗ ████║██╔════╝    ╚══██╔══╝██║████╗ ████║██╔════╝██╔══██╗
-   ██║   ██║██╔████╔██║█████╗         ██║   ██║██╔████╔██║█████╗  ██████╔╝
-   ██║   ██║██║╚██╔╝██║██╔══╝         ██║   ██║██║╚██╔╝██║██╔══╝  ██╔══██╗
-   ██║   ██║██║ ╚═╝ ██║███████╗       ██║   ██║██║ ╚═╝ ██║███████╗██║  ██║
-   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝       ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
-
-*/
-
-void time_rtc_start_sync_cb(msg_t *msg)
+void periodic_1min_cb(msg_t *msg)
+{
+    nextion_1_set_datetime(time_get_datetime_formated(false, 0));
+}
+void periodic_10min_cb(msg_t *msg)
 {
     nextion_1_datetime_get_rtc_year();
     nextion_1_datetime_get_rtc_month();
@@ -2696,13 +2700,22 @@ void time_rtc_start_sync_cb(msg_t *msg)
     nextion_1_datetime_get_rtc_dateformat();
     nextion_1_datetime_get_rtc_timeformat();
 }
+
+/*
+████████╗██╗███╗   ███╗███████╗
+╚══██╔══╝██║████╗ ████║██╔════╝
+   ██║   ██║██╔████╔██║█████╗
+   ██║   ██║██║╚██╔╝██║██╔══╝
+   ██║   ██║██║ ╚═╝ ██║███████╗
+   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝
+
+*/
+
 void time_rtc_data_received_cb(msg_t *msg)
 {
-    time_set_rtc_data_1by1(msg->content.i32);
-}
-void time_datetime_print_cb(msg_t *msg)
-{
-    nextion_1_set_datetime(time_get_datetime_formated(false, 0));
+    bool need_to_update_datetime_on_nextion = (time_set_rtc_data_1by1(msg->content.i32) == true);
+    if (need_to_update_datetime_on_nextion)
+        nextion_1_set_datetime(time_get_datetime_formated(false, 0));
 }
 
 /*

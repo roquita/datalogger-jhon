@@ -125,7 +125,10 @@ typedef enum
 
     // MAIN TIMER
     PERIODIC_100MS,
+    PERIODIC_300MS,
     PERIODIC_1S,
+    PERIODIC_1MIN,
+    PERIODIC_10MIN,
 
     //
 

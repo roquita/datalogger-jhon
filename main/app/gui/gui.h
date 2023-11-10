@@ -37,10 +37,11 @@ typedef struct
    ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
 
 */
+/*
 void nextion_1_init_timer();
 void nextion_1_start_timer();
 void nextion_1_stop_timer();
-
+*/
 /*
  ██████╗ ███████╗███╗   ██╗███████╗██████╗  █████╗ ██╗
 ██╔════╝ ██╔════╝████╗  ██║██╔════╝██╔══██╗██╔══██╗██║
@@ -245,6 +246,7 @@ void nextion_1_new_test_p7_4_write_current_value(char *content);
 
 */
 void nextion_1_message_write_content(char *content);
+void nextion_1_message_append_content(char *content);
 void nextion_1_message_write_nextpage(page_t content);
 void nextion_1_message_write_content_color(uint32_t content);
 

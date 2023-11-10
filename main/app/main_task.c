@@ -238,7 +238,7 @@ void main_task(void *arg)
         }
 
         // CURRENT TEST
-        else if(type == CURRENT_TEST_OPERATOR_STOP)
+        else if (type == CURRENT_TEST_OPERATOR_STOP)
             current_test_operator_stop_cb(&msg);
 
         // SENSOR UNIT CHANGED
@@ -251,32 +251,34 @@ void main_task(void *arg)
         else if (type == SENSOR_CLASS_RECEIVED)
             sensor_class_received_cb(&msg);
 
-        // NEXTION-TIMER
-        else if (type == NEXTION_UPDATE)
-            nextion_update_cb(&msg);
-
         // MAIN TIMER
         else if (type == PERIODIC_100MS)
             periodic_100ms_cb(&msg);
+        else if (type == PERIODIC_300MS)
+            periodic_300ms_cb(&msg);
         else if (type == PERIODIC_1S)
             periodic_1s_cb(&msg);
+        else if (type == PERIODIC_1MIN)
+            periodic_1min_cb(&msg);
+        else if (type == PERIODIC_10MIN)
+            periodic_10min_cb(&msg);
 
         // TIME_TIMER
-        else if (type == TIME_RTC_START_SYNC)
-            time_rtc_start_sync_cb(&msg);
+      //  else if (type == TIME_RTC_START_SYNC)
+      //      time_rtc_start_sync_cb(&msg);
         else if (type == TIME_RTC_DATA_RECEIVED)
             time_rtc_data_received_cb(&msg);
-        else if (type == TIME_DATETIME_PRINT)
-            time_datetime_print_cb(&msg);
+     //   else if (type == TIME_DATETIME_PRINT)
+      //      time_datetime_print_cb(&msg);
 
         // USB
-        else if ( type == USB_CONNECTED)
+        else if (type == USB_CONNECTED)
             usb_connected_cb(&msg);
-        else if ( type == USB_DISCONNECTED)
+        else if (type == USB_DISCONNECTED)
             usb_disconnected_cb(&msg);
         else
         {
-            ESP_LOGE(TAG, "file:%s,line:%u", __FILE__, __LINE__);
+            ESP_LOGE(TAG, "file:%s,line:%u, type:%d", __FILE__, __LINE__, type);
         }
     }
 }

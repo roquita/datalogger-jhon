@@ -1,0 +1,9 @@
+Task priorities
+
+usb host task - 2
+usb msc task - 3
+sensor task - 6
+main task - 5
+timer daemon task(hx711) - 25 
+dialbig async - 24
+nextion async - 4

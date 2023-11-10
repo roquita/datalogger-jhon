@@ -27,10 +27,11 @@ static int64_t _timestamp;
 static char buffer[100];
 
 // functions
+/*
 static void time_timer_callback(TimerHandle_t xTimer)
 {
     static int counter;
-    SEND_EMPTY_MSG(main_queue, ((counter % 2) == 0) ? TIME_RTC_START_SYNC : TIME_DATETIME_PRINT, portMAX_DELAY);
+    SEND_EMPTY_MSG(main_queue, ((counter % 10) == 0) ? TIME_RTC_START_SYNC : TIME_DATETIME_PRINT, portMAX_DELAY);
     counter++;
 }
 
@@ -45,6 +46,7 @@ void time_rtc_start_sync()
 {
     SEND_EMPTY_MSG(main_queue, TIME_RTC_START_SYNC, portMAX_DELAY);
 }
+*/
 void time_set_rtc_data_atOnce(struct tm *datetime, dateformat_t d, timeformat_t t)
 {
     _dateformat = d;
@@ -52,10 +54,11 @@ void time_set_rtc_data_atOnce(struct tm *datetime, dateformat_t d, timeformat_t 
     struct timeval now = {.tv_sec = mktime(datetime), .tv_usec = 0};
     settimeofday(&now, NULL);
 
-    SEND_EMPTY_MSG(main_queue, TIME_DATETIME_PRINT, portMAX_DELAY);
+    // SEND_EMPTY_MSG(main_queue, TIME_DATETIME_PRINT, portMAX_DELAY);
 }
-void time_set_rtc_data_1by1(int32_t data)
+bool time_set_rtc_data_1by1(int32_t data)
 {
+    bool need_to_update_datetime_on_nextion = false;
 
     if ((_rtc_data_pos != 0) && (time_get_timestamp() - _timestamp > 5))
     {
@@ -92,15 +95,18 @@ void time_set_rtc_data_1by1(int32_t data)
         struct timeval now = {.tv_sec = mktime(&_datetime), .tv_usec = 0};
         settimeofday(&now, NULL);
 
-        SEND_EMPTY_MSG(main_queue, TIME_DATETIME_PRINT, portMAX_DELAY);
+        // SEND_EMPTY_MSG(main_queue, TIME_DATETIME_PRINT, portMAX_DELAY);
+        need_to_update_datetime_on_nextion = true;
         break;
     default:
-        return;
+        break;
     }
 
     _rtc_data_pos++;
     if (_rtc_data_pos >= 8)
         _rtc_data_pos = 0;
+
+    return need_to_update_datetime_on_nextion;
 }
 int64_t time_get_timestamp()
 {

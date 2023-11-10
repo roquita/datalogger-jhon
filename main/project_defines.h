@@ -104,7 +104,7 @@
 
 #define TEST_ROWS_NUM_MAX (30)
 #define TEST_FS_SLOT_SIZE_MIN (10 * 1024) // 10kB
-#define FATFS_BASE_PATH "/disk0"
+#define FATFS_BASE_PATH "/mem"
 #define FATFS_DISK_INDEX "0:"
 #define FATFS_FILETYPE_TEST "tst"
 #define FATFS_FILETYPE_TEMPLATE "tmp"

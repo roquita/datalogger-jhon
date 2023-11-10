@@ -124,17 +124,17 @@ void sensor_unit_changed(msg_t *msg);
 void sensor_reading_received_cb(msg_t *msg);
 void sensor_class_received_cb(msg_t *msg);
 
-// NEXTION-TIMER
-void nextion_update_cb(msg_t *msg);
-
 //  MAIN TIMER
 void periodic_100ms_cb(msg_t *msg);
+void periodic_300ms_cb(msg_t *msg);
 void periodic_1s_cb(msg_t *msg);
+void periodic_1min_cb(msg_t *msg);
+void periodic_10min_cb(msg_t *msg);
 
-// TIME TIMER
-void time_rtc_start_sync_cb(msg_t *msg);
+// TIME 
+//void time_rtc_start_sync_cb(msg_t *msg);
 void time_rtc_data_received_cb(msg_t *msg);
-void time_datetime_print_cb(msg_t *msg);
+//void time_datetime_print_cb(msg_t *msg);
 
 // USB
 void usb_connected_cb(msg_t *msg);

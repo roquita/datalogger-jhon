@@ -263,8 +263,10 @@ void code_rcv_1_cb(nextion_cmd_t *cmd)
                 SEND_I32_MSG(main_queue, TARA_DISABLED, SENSOR_4_INDEX, portMAX_DELAY)
             else if (component_id == 0x19 && event == 0x04)
                 SEND_I32_MSG(main_queue, TARA_ENABLED, SENSOR_4_INDEX, portMAX_DELAY)
+            // GO TO NEW TEST
             else if (component_id == 0x3B && event == 0x01)
                 SEND_EMPTY_MSG(main_queue, GOTO_NEW_TEST_FROM_HOME, portMAX_DELAY)
+            // GO TO CURRENT TEST
             else if (component_id == 0x3B && event == 0x02)
                 SEND_EMPTY_MSG(main_queue, GOTO_CURRENT_TEST_FROM_HOME, portMAX_DELAY)
         }
@@ -886,6 +888,7 @@ void nextion_1_goto_page(page_t page)
    ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚═╝  ╚═╝
 
 */
+/*
 TimerHandle_t timer_handle = NULL;
 void nextion_1_timer(TimerHandle_t xTimer)
 {
@@ -907,6 +910,7 @@ void nextion_1_stop_timer()
     assert(timer_handle != NULL);
     xTimerStop(timer_handle, portMAX_DELAY);
 }
+*/
 /*
 ██╗███╗   ██╗████████╗██████╗  ██████╗
 ██║████╗  ██║╚══██╔══╝██╔══██╗██╔═══██╗
@@ -1258,9 +1262,13 @@ void nextion_1_message_write_content(char *content)
 {
     nextion_set_txt_from_objId(&nextion_1, PAGE_MESSAGE, 2, content);
 }
+void nextion_1_message_append_content(char *content)
+{
+    nextion_append_txt_from_objId(&nextion_1, PAGE_MESSAGE, 2, content);
+}
 void nextion_1_message_write_nextpage(page_t content)
 {
-    nextion_set_val_from_objId(&nextion_1, PAGE_MESSAGE, 6, content);
+    nextion_set_val_from_objId(&nextion_1, PAGE_MESSAGE, 5, content);
 }
 void nextion_1_message_write_content_color(uint32_t content)
 {
@@ -1458,8 +1466,13 @@ void nextion_1_current_test_p3_write_slope(int pos, int content)
 }
 void nextion_1_current_test_p3_clean_sensor_data()
 {
-    nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 83, 150);
-    nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
+    // nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, 83, 150);
+    // nextion_set_en_from_objName_local(&nextion_1, "tm1", true);
+
+    for (int id = 23; id <= 83; id++)
+    {
+        nextion_set_val_from_objId(&nextion_1, PAGE_CURRENT_TEST_P3, id, 0);
+    }
 }
 
 // APPEND DATA
